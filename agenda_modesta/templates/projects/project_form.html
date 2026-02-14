@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+
+{% block title %}{% if projeto %}Editar{% else %}Novo{% endif %} Projeto - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{% if projeto %}Editar Projeto{% else %}Novo Projeto{% endif %}</h1>
+    <p class="text-gray-500 mt-1">{% if projeto %}Atualize os dados do projeto{% else %}Preencha os dados do novo projeto{% endif %}</p>
+  </div>
+</div>
+
+<div class="card max-w-2xl">
+  <div class="card-body">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group md:col-span-2">
+          <label for="id_nome" class="form-label">Nome do Projeto *</label>
+          <input type="text"
+                 id="id_nome"
+                 name="nome"
+                 value="{{ form.nome.value|default:'' }}"
+                 class="form-input {% if form.nome.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.nome.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.nome.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_cliente" class="form-label">Cliente *</label>
+          <select id="id_cliente"
+                  name="cliente"
+                  class="form-input {% if form.cliente.errors %}border-red-500{% endif %}"
+                  required>
+            <option value="">Selecione um cliente...</option>
+            {% for cliente in clientes %}
+            <option value="{{ cliente.id }}" {% if form.cliente.value == cliente.id|stringformat:"s" or cliente_selecionado == cliente.id %}selected{% endif %}>{{ cliente.nome }}</option>
+            {% endfor %}
+          </select>
+          {% if form.cliente.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.cliente.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_descricao" class="form-label">Descrição</label>
+          <textarea id="id_descricao"
+                    name="descricao"
+                    rows="3"
+                    class="form-input {% if form.descricao.errors %}border-red-500{% endif %}">{{ form.descricao.value|default:'' }}</textarea>
+          {% if form.descricao.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.descricao.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_status" class="form-label">Status *</label>
+          <select id="id_status"
+                  name="status"
+                  class="form-input {% if form.status.errors %}border-red-500{% endif %}"
+                  required>
+            <option value="PLANEJAMENTO" {% if form.status.value == 'PLANEJAMENTO' %}selected{% endif %}>Planejamento</option>
+            <option value="EM_ANDAMENTO" {% if form.status.value == 'EM_ANDAMENTO' %}selected{% endif %}>Em Andamento</option>
+            <option value="CONCLUIDO" {% if form.status.value == 'CONCLUIDO' %}selected{% endif %}>Concluído</option>
+            <option value="CANCELADO" {% if form.status.value == 'CANCELADO' %}selected{% endif %}>Cancelado</option>
+          </select>
+          {% if form.status.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.status.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_data_inicio" class="form-label">Data de Início</label>
+          <input type="date"
+                 id="id_data_inicio"
+                 name="data_inicio"
+                 value="{{ form.data_inicio.value|date:'Y-m-d'|default:'' }}"
+                 class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="id_data_prevista" class="form-label">Previsão de Conclusão</label>
+          <input type="date"
+                 id="id_data_prevista_conclusao"
+                 name="data_prevista_conclusao"
+                 value="{{ form.data_prevista_conclusao.value|date:'Y-m-d'|default:'' }}"
+                 class="form-input">
+        </div>
+
+        <div class="form-group">
+          <label for="id_data_conclusao" class="form-label">Data de Conclusão</label>
+          <input type="date"
+                 id="id_data_conclusao"
+                 name="data_conclusao"
+                 value="{{ form.data_conclusao.value|date:'Y-m-d'|default:'' }}"
+                 class="form-input">
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox"
+                   name="ativo"
+                   {% if form.ativo.value %}checked{% endif %}
+                   class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+            <span class="text-sm text-gray-700">Projeto ativo</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+        <a href="{% url 'projects:list' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          {% if projeto %}Salvar Alterações{% else %}Criar Projeto{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,156 @@
+{% comment %}
+  Calendário semanal usando FullCalendar.js + django-scheduler API.
+  Recebe {{ calendar_slug }} do contexto.
+{% endcomment %}
+
+<div class="card mb-8">
+  <div class="card-header">
+    <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
+      <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      </svg>
+      Calendário Semanal
+    </h2>
+  </div>
+  <div class="card-body p-2 sm:p-4">
+    <div id="fullcalendar"></div>
+  </div>
+</div>
+
+<style>
+  /* Ajustes visuais para FullCalendar dentro do card */
+  #fullcalendar {
+    --fc-border-color: #e5e7eb;
+    --fc-today-bg-color: #f0fdfa;
+    --fc-page-bg-color: transparent;
+    --fc-neutral-bg-color: #f9fafb;
+    font-size: 13px;
+  }
+  #fullcalendar .fc-toolbar-title {
+    font-size: 1.1rem !important;
+    font-weight: 600;
+  }
+  #fullcalendar .fc-button {
+    font-size: 0.8rem;
+    padding: 0.3em 0.6em;
+  }
+  #fullcalendar .fc-event {
+    border-radius: 4px;
+    padding: 1px 4px;
+    font-size: 0.75rem;
+    cursor: pointer;
+  }
+  #fullcalendar .fc-col-header-cell-cushion {
+    font-weight: 600;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    letter-spacing: 0.05em;
+  }
+  #fullcalendar .fc-timegrid-slot-label-cushion {
+    font-size: 0.7rem;
+    color: #9ca3af;
+  }
+  /* Altura mínima para a grade */
+  #fullcalendar .fc-timegrid {
+    min-height: 500px;
+  }
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  var calendarEl = document.getElementById('fullcalendar');
+  if (!calendarEl) return;
+
+  var calendar = new FullCalendar.Calendar(calendarEl, {
+    // Configuração geral
+    initialView: 'timeGridWeek',
+    locale: 'pt-br',
+    timeZone: 'America/Sao_Paulo',
+    height: 'auto',
+    allDaySlot: false,
+    slotMinTime: '07:00:00',
+    slotMaxTime: '23:00:00',
+    slotDuration: '00:30:00',
+    slotLabelInterval: '01:00',
+    expandRows: true,
+    nowIndicator: true,
+    navLinks: true,
+    dayMaxEvents: true,
+
+    // Toolbar
+    headerToolbar: {
+      left: 'prev,today,next',
+      center: 'title',
+      right: 'timeGridWeek,timeGridDay,dayGridMonth,listWeek'
+    },
+    buttonText: {
+      today: 'Hoje',
+      month: 'Mês',
+      week: 'Semana',
+      day: 'Dia',
+      list: 'Lista'
+    },
+
+    // Buscar eventos da API do django-scheduler
+    events: function(info, successCallback, failureCallback) {
+      var start = info.startStr.split('T')[0];
+      var end = info.endStr.split('T')[0];
+      var url = '/schedule/api/occurrences?calendar_slug={{ calendar_slug }}'
+              + '&start=' + start
+              + '&end=' + end
+              + '&timezone=America/Sao_Paulo';
+
+      fetch(url, { credentials: 'same-origin' })
+        .then(function(resp) {
+          if (!resp.ok) throw new Error('HTTP ' + resp.status);
+          return resp.json();
+        })
+        .then(function(data) {
+          var events = data.map(function(occ) {
+            return {
+              id: occ.id,
+              title: occ.title,
+              start: occ.start,
+              end: occ.end,
+              color: occ.color || '#3b82f6',
+              url: occ.edit_url || null,
+              extendedProps: {
+                description: occ.description || '',
+                eventId: occ.event_id
+              }
+            };
+          });
+          successCallback(events);
+        })
+        .catch(function(err) {
+          console.error('[FullCalendar] Erro:', err);
+          failureCallback(err);
+        });
+    },
+
+    // Ao clicar num evento, ir para edição do agendamento
+    eventClick: function(info) {
+      info.jsEvent.preventDefault();
+      // Extrair agenda_id da description
+      var desc = info.event.extendedProps.description || '';
+      var match = desc.match(/agenda_id:([0-9a-f-]+)/);
+      if (match) {
+        window.location.href = '/agenda/' + match[1] + '/editar/';
+      }
+    },
+
+    // Tooltip ao hover
+    eventDidMount: function(info) {
+      var desc = info.event.extendedProps.description || '';
+      // Limpar o agenda_id: da tooltip
+      var clean = desc.replace(/agenda_id:[0-9a-f-]+\n?/, '').trim();
+      if (clean) {
+        info.el.title = info.event.title + ' — ' + clean;
+      }
+    }
+  });
+
+  calendar.render();
+});
+</script>

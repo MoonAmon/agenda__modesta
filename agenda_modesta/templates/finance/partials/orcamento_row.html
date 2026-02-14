@@ -1,0 +1,89 @@
+<tr id="orcamento-{{ orcamento.id }}">
+  <td>
+    <span class="font-medium text-gray-900">#{{ orcamento.numero_sequencial }}</span>
+  </td>
+  <td>
+    <div class="flex items-center gap-2">
+      <div class="w-8 h-8 rounded-full bg-primary-100 flex items-center justify-center">
+        <span class="text-xs font-medium text-primary-700">{{ orcamento.cliente.nome|slice:":1"|upper }}</span>
+      </div>
+      <span>{{ orcamento.cliente.nome }}</span>
+    </div>
+  </td>
+  <td>{{ orcamento.projeto.nome|default:"-" }}</td>
+  <td>{{ orcamento.horas_trabalhadas }}h</td>
+  <td>
+    <span class="font-medium text-gray-900">R$ {{ orcamento.valor_total }}</span>
+  </td>
+  <td>
+    {% if orcamento.status_pagamento == 'pago' %}
+    <span class="badge badge-success">Pago</span>
+    {% else %}
+    <span class="badge badge-warning">Pendente</span>
+    {% endif %}
+  </td>
+  <td>{{ orcamento.data_emissao|date:"d/m/Y" }}</td>
+  <td>
+    <div class="flex items-center justify-end gap-2">
+      <!-- Enviar por email -->
+      <button hx-post="{% url 'finance:orcamento_enviar_email' orcamento.id %}"
+              hx-swap="none"
+              class="text-gray-400 hover:text-blue-600"
+              title="Enviar por email">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+        </svg>
+      </button>
+
+      <!-- Download PDF -->
+      <a href="{% url 'finance:orcamento_pdf' orcamento.id %}"
+         class="text-gray-400 hover:text-gray-600" title="Download PDF">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      </a>
+
+      <!-- Marcar como pago -->
+      {% if orcamento.status_pagamento != 'pago' %}
+      <button hx-post="{% url 'finance:orcamento_marcar_pago' orcamento.id %}"
+              hx-target="#orcamento-{{ orcamento.id }}"
+              hx-swap="outerHTML"
+              class="text-gray-400 hover:text-green-600"
+              title="Marcar como pago">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </button>
+      {% endif %}
+
+      <!-- Gerar Recibo -->
+      {% if orcamento.status_pagamento == 'pago' %}
+      <a href="{% url 'finance:recibo_from_orcamento' orcamento.id %}"
+         class="text-gray-400 hover:text-purple-600" title="Gerar Recibo">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+        </svg>
+      </a>
+      {% endif %}
+
+      <!-- Editar -->
+      <a href="{% url 'finance:orcamento_edit' orcamento.id %}"
+         class="text-gray-400 hover:text-primary-600" title="Editar">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+        </svg>
+      </a>
+
+      <!-- Excluir -->
+      <button hx-delete="{% url 'finance:orcamento_delete' orcamento.id %}"
+              hx-target="#orcamento-{{ orcamento.id }}"
+              hx-swap="outerHTML"
+              hx-confirm="Tem certeza que deseja excluir este orçamento?"
+              class="text-gray-400 hover:text-red-600" title="Excluir">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+        </svg>
+      </button>
+    </div>
+  </td>
+</tr>

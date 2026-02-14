@@ -1,0 +1,181 @@
+{% extends "base.html" %} {% block title %}Agenda - Agenda Modesta{% endblock %}
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Agenda</h1>
+    <p class="text-gray-500 mt-1">Gerencie seus agendamentos</p>
+  </div>
+  <a href="{% url 'agenda:create' %}" class="btn btn-primary">
+    <svg
+      class="w-5 h-5 mr-2"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M12 6v6m0 0v6m0-6h6m-6 0H6"
+      ></path>
+    </svg>
+    Novo Agendamento
+  </a>
+  <button
+    hx-get="{% url 'agenda:novo_agendamento' %}"
+    hx-target="#modal-content"
+    hx-trigger="click"
+    hx-swap="innerHTML"
+    onclick="
+      document.getElementById('modal-overlay').classList.remove('hidden')
+    "
+    class="btn btn-secondary ml-2"
+  >
+    <svg
+      class="w-5 h-5 mr-2"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M13 10V3L4 14h7v7l9-11h-7z"
+      ></path>
+    </svg>
+    Agendamento Rápido
+  </button>
+</div>
+
+<!-- Filters -->
+<div class="card mb-6">
+  <div class="card-body">
+    <form method="get" class="flex flex-wrap gap-4">
+      <div class="flex-1 min-w-[200px]">
+        <input
+          type="text"
+          name="q"
+          value="{{ request.GET.q }}"
+          placeholder="Buscar por título ou projeto..."
+          class="form-input"
+          hx-get="{% url 'agenda:list' %}"
+          hx-trigger="keyup changed delay:500ms"
+          hx-target="#agenda-list"
+          hx-swap="innerHTML"
+        />
+      </div>
+      <div>
+        <input
+          type="date"
+          name="data_inicio"
+          value="{{ request.GET.data_inicio }}"
+          class="form-input"
+          onchange="this.form.submit()"
+        />
+      </div>
+      <div>
+        <input
+          type="date"
+          name="data_fim"
+          value="{{ request.GET.data_fim }}"
+          class="form-input"
+          onchange="this.form.submit()"
+        />
+      </div>
+      <div>
+        <select
+          name="confirmado"
+          class="form-input"
+          onchange="this.form.submit()"
+        >
+          <option value="">Todos</option>
+          <option
+            value="true"
+            {%
+            if
+            request.GET.confirmado=""
+            ="true"
+            %}selected{%
+            endif
+            %}
+          >
+            Confirmados
+          </option>
+          <option
+            value="false"
+            {%
+            if
+            request.GET.confirmado=""
+            ="false"
+            %}selected{%
+            endif
+            %}
+          >
+            Pendentes
+          </option>
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Calendar View Toggle -->
+<div class="flex gap-2 mb-6">
+  <button class="btn btn-primary" id="list-view-btn">
+    <svg
+      class="w-4 h-4 mr-2"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M4 6h16M4 10h16M4 14h16M4 18h16"
+      ></path>
+    </svg>
+    Lista
+  </button>
+  <button class="btn btn-secondary" id="calendar-view-btn">
+    <svg
+      class="w-4 h-4 mr-2"
+      fill="none"
+      stroke="currentColor"
+      viewBox="0 0 24 24"
+    >
+      <path
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        stroke-width="2"
+        d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+      ></path>
+    </svg>
+    Calendário
+  </button>
+</div>
+
+<!-- Agenda List -->
+<div
+  id="agenda-list"
+  hx-trigger="agendamentoCriado from:body"
+  hx-get="{% url 'agenda:list' %}"
+  hx-target="#agenda-list"
+  hx-swap="innerHTML"
+>
+  {% include "agenda/partials/agenda_list.html" %}
+</div>
+
+<!-- Modal HTMX (agendamento rápido em passos) -->
+<div
+  id="modal-overlay"
+  class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/40"
+>
+  <div class="bg-white rounded-lg shadow-xl w-full max-w-lg mx-4">
+    <div id="modal-content">
+      <!-- Conteúdo carregado via HTMX -->
+    </div>
+  </div>
+</div>
+{% endblock %}

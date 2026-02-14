@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+
+{% block title %}Clientes - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Clientes</h1>
+    <p class="text-gray-500 mt-1">Gerencie sua base de clientes</p>
+  </div>
+  <a href="{% url 'clients:create' %}" class="btn btn-primary">
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+    </svg>
+    Novo Cliente
+  </a>
+</div>
+
+<!-- Filters -->
+<div class="card mb-6">
+  <div class="card-body">
+    <form method="get" class="flex flex-wrap gap-4">
+      <div class="flex-1 min-w-[200px]">
+        <input type="text"
+               name="q"
+               value="{{ request.GET.q }}"
+               placeholder="Buscar por nome, email ou telefone..."
+               class="form-input"
+               hx-get="{% url 'clients:list' %}"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#clients-table"
+               hx-swap="innerHTML">
+      </div>
+      <div>
+        <select name="ativo" class="form-input" onchange="this.form.submit()">
+          <option value="">Todos</option>
+          <option value="true" {% if request.GET.ativo == 'true' %}selected{% endif %}>Ativos</option>
+          <option value="false" {% if request.GET.ativo == 'false' %}selected{% endif %}>Inativos</option>
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Clients Table -->
+<div class="card">
+  <div class="table-container" id="clients-table">
+    {% include "clients/partials/client_table.html" %}
+  </div>
+</div>
+{% endblock %}

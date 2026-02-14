@@ -1,0 +1,11 @@
+{
+  "name": "agenda-modesta",
+  "version": "1.0.0",
+  "scripts": {
+    "build:css": "tailwindcss -i ./agenda_modesta/static/css/input.css -o ./agenda_modesta/static/css/output.css --minify",
+    "watch:css": "tailwindcss -i ./agenda_modesta/static/css/input.css -o ./agenda_modesta/static/css/output.css --watch"
+  },
+  "devDependencies": {
+    "tailwindcss": "^3.4.0"
+  }
+}

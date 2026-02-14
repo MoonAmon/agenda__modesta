@@ -1,0 +1,134 @@
+{% extends "base.html" %}
+
+{% block title %}{% if cliente %}Editar{% else %}Novo{% endif %} Cliente - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{% if cliente %}Editar Cliente{% else %}Novo Cliente{% endif %}</h1>
+    <p class="text-gray-500 mt-1">{% if cliente %}Atualize os dados do cliente{% else %}Preencha os dados do novo cliente{% endif %}</p>
+  </div>
+</div>
+
+<div class="card max-w-2xl">
+  <div class="card-body">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group md:col-span-2">
+          <label for="id_nome" class="form-label">Nome Completo *</label>
+          <input type="text"
+                 id="id_nome"
+                 name="nome"
+                 value="{{ form.nome.value|default:'' }}"
+                 class="form-input {% if form.nome.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.nome.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.nome.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_email" class="form-label">Email *</label>
+          <input type="email"
+                 id="id_email"
+                 name="email"
+                 value="{{ form.email.value|default:'' }}"
+                 class="form-input {% if form.email.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.email.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.email.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_telefone" class="form-label">Telefone *</label>
+          <input type="text"
+                 id="id_telefone"
+                 name="telefone"
+                 value="{{ form.telefone.value|default:'' }}"
+                 class="form-input {% if form.telefone.errors %}border-red-500{% endif %}"
+                 placeholder="(00) 00000-0000"
+                 required>
+          {% if form.telefone.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.telefone.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_cpf_cnpj" class="form-label">CPF/CNPJ *</label>
+          <input type="text"
+                 id="id_cpf_cnpj"
+                 name="cpf_cnpj"
+                 value="{{ form.cpf_cnpj.value|default:'' }}"
+                 class="form-input {% if form.cpf_cnpj.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.cpf_cnpj.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.cpf_cnpj.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_endereco" class="form-label">Endereço *</label>
+          <input type="text"
+                 id="id_endereco"
+                 name="endereco"
+                 value="{{ form.endereco.value|default:'' }}"
+                 class="form-input {% if form.endereco.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.endereco.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.endereco.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_cidade" class="form-label">Cidade *</label>
+          <input type="text"
+                 id="id_cidade"
+                 name="cidade"
+                 value="{{ form.cidade.value|default:'' }}"
+                 class="form-input {% if form.cidade.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.cidade.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.cidade.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_estado" class="form-label">Estado *</label>
+          <select id="id_estado"
+                  name="estado"
+                  class="form-input {% if form.estado.errors %}border-red-500{% endif %}"
+                  required>
+            <option value="">Selecione...</option>
+            {% for uf in ufs %}
+            <option value="{{ uf }}" {% if form.estado.value == uf %}selected{% endif %}>{{ uf }}</option>
+            {% endfor %}
+          </select>
+          {% if form.estado.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.estado.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox"
+                   name="ativo"
+                   {% if form.ativo.value %}checked{% endif %}
+                   class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+            <span class="text-sm text-gray-700">Cliente ativo</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+        <a href="{% url 'clients:list' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          {% if cliente %}Salvar Alterações{% else %}Cadastrar Cliente{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

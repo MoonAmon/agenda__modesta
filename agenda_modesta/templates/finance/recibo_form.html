@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}{% if recibo %}Editar{% else %}Novo{% endif %} Recibo - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{% if recibo %}Editar Recibo{% else %}Novo Recibo{% endif %}</h1>
+    <p class="text-gray-500 mt-1">{% if recibo %}Atualize os dados do recibo{% else %}Preencha os dados do novo recibo{% endif %}</p>
+  </div>
+</div>
+
+<div class="card max-w-2xl">
+  <div class="card-body">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group">
+          <label for="id_cliente" class="form-label">Cliente *</label>
+          <select id="id_cliente"
+                  name="cliente"
+                  class="form-input {% if form.cliente.errors %}border-red-500{% endif %}"
+                  required>
+            <option value="">Selecione um cliente...</option>
+            {% for cliente in clientes %}
+            <option value="{{ cliente.id }}" {% if form.cliente.value == cliente.id|stringformat:"s" %}selected{% endif %}>{{ cliente.nome }}</option>
+            {% endfor %}
+          </select>
+          {% if form.cliente.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.cliente.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_projeto" class="form-label">Projeto</label>
+          <select id="id_projeto"
+                  name="projeto"
+                  class="form-input">
+            <option value="">Selecione um projeto...</option>
+            {% for projeto in projetos %}
+            <option value="{{ projeto.id }}" {% if form.projeto.value == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_descricao" class="form-label">Descrição do Serviço</label>
+          <textarea id="id_descricao"
+                    name="descricao"
+                    rows="3"
+                    class="form-input"
+                    placeholder="Descreva os serviços realizados...">{{ form.descricao.value|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="id_horas_trabalhadas" class="form-label">Horas Trabalhadas *</label>
+          <input type="number"
+                 id="id_horas_trabalhadas"
+                 name="horas_trabalhadas"
+                 value="{{ form.horas_trabalhadas.value|default:'' }}"
+                 step="0.5"
+                 min="0.5"
+                 class="form-input {% if form.horas_trabalhadas.errors %}border-red-500{% endif %}"
+                 required
+                 oninput="calcularTotal()">
+          {% if form.horas_trabalhadas.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.horas_trabalhadas.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_valor_hora" class="form-label">Valor/Hora (R$) *</label>
+          <input type="number"
+                 id="id_valor_hora"
+                 name="valor_hora"
+                 value="{{ form.valor_hora.value|default:'' }}"
+                 step="0.01"
+                 min="0"
+                 class="form-input {% if form.valor_hora.errors %}border-red-500{% endif %}"
+                 required
+                 oninput="calcularTotal()">
+          {% if form.valor_hora.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.valor_hora.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_valor_total" class="form-label">Valor Total (R$)</label>
+          <input type="number"
+                 id="id_valor_total"
+                 name="valor_total"
+                 value="{{ form.valor_total.value|default:'' }}"
+                 step="0.01"
+                 class="form-input bg-gray-50 font-bold text-lg"
+                 readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="id_forma_pagamento" class="form-label">Forma de Pagamento *</label>
+          <select id="id_forma_pagamento"
+                  name="forma_pagamento"
+                  class="form-input"
+                  required>
+            <option value="pix" {% if form.forma_pagamento.value == 'pix' %}selected{% endif %}>Pix</option>
+            <option value="dinheiro" {% if form.forma_pagamento.value == 'dinheiro' %}selected{% endif %}>Dinheiro</option>
+            <option value="cartao" {% if form.forma_pagamento.value == 'cartao' %}selected{% endif %}>Cartão</option>
+            <option value="transferencia" {% if form.forma_pagamento.value == 'transferencia' %}selected{% endif %}>Transferência</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+        <a href="{% url 'finance:recibos' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          {% if recibo %}Salvar Alterações{% else %}Criar Recibo{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% block inline_javascript %}
+<script>
+function calcularTotal() {
+  const horas = parseFloat(document.getElementById('id_horas_trabalhadas').value) || 0;
+  const valorHora = parseFloat(document.getElementById('id_valor_hora').value) || 0;
+  const total = horas * valorHora;
+  document.getElementById('id_valor_total').value = total.toFixed(2);
+}
+
+document.addEventListener('DOMContentLoaded', calcularTotal);
+</script>
+{% endblock %}
+{% endblock %}

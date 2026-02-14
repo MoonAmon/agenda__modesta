@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{% if pacote %}Editar{% else %}Novo{% endif %} Pacote - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{% if pacote %}Editar Pacote{% else %}Novo Pacote{% endif %}</h1>
+    <p class="text-gray-500 mt-1">{% if pacote %}Atualize os dados do pacote{% else %}Configure um novo pacote de serviços{% endif %}</p>
+  </div>
+</div>
+
+<div class="card max-w-2xl">
+  <div class="card-body">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group md:col-span-2">
+          <label for="id_nome" class="form-label">Nome do Pacote *</label>
+          <input type="text"
+                 id="id_nome"
+                 name="nome"
+                 value="{{ form.nome.value|default:'' }}"
+                 class="form-input {% if form.nome.errors %}border-red-500{% endif %}"
+                 placeholder="Ex: Pacote 10h + Otimização"
+                 required>
+          {% if form.nome.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.nome.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_descricao" class="form-label">Descrição</label>
+          <textarea id="id_descricao"
+                    name="descricao"
+                    rows="3"
+                    class="form-input"
+                    placeholder="Descreva o pacote de serviços...">{{ form.descricao.value|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="id_horas_inclusas" class="form-label">Horas Inclusas</label>
+          <input type="number"
+                 id="id_horas_inclusas"
+                 name="horas_inclusas"
+                 value="{{ form.horas_inclusas.value|default:'' }}"
+                 step="0.5"
+                 min="0"
+                 class="form-input"
+                 placeholder="Ex: 10">
+          <p class="text-xs text-gray-500 mt-1">Deixe vazio para hora avulsa</p>
+        </div>
+
+        <div class="form-group">
+          <label for="id_valor_hora_pacote" class="form-label">Valor por Hora (R$) *</label>
+          <input type="number"
+                 id="id_valor_hora_pacote"
+                 name="valor_hora_pacote"
+                 value="{{ form.valor_hora_pacote.value|default:'' }}"
+                 step="0.01"
+                 min="0"
+                 class="form-input {% if form.valor_hora_pacote.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.valor_hora_pacote.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.valor_hora_pacote.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_valor_hora_referencia" class="form-label">Valor/Hora Referência (R$)</label>
+          <input type="number"
+                 id="id_valor_hora_referencia"
+                 name="valor_hora_referencia"
+                 value="{{ form.valor_hora_referencia.value|default:'' }}"
+                 step="0.01"
+                 min="0"
+                 class="form-input">
+          <p class="text-xs text-gray-500 mt-1">Para exibir desconto ao cliente</p>
+        </div>
+
+        <div class="form-group">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox"
+                   name="inclui_otimizacao"
+                   {% if form.inclui_otimizacao.value %}checked{% endif %}
+                   class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+            <span class="text-sm text-gray-700">Inclui otimização</span>
+          </label>
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_beneficios" class="form-label">Benefícios Extras</label>
+          <textarea id="id_beneficios"
+                    name="beneficios"
+                    rows="3"
+                    class="form-input"
+                    placeholder="Ex: Direção de arte, vinheta, desconto vitalício...">{{ form.beneficios.value|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox"
+                   name="ativo"
+                   {% if form.ativo.value %}checked{% endif %}
+                   class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+            <span class="text-sm text-gray-700">Pacote ativo</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+        <a href="{% url 'finance:pacotes' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          {% if pacote %}Salvar Alterações{% else %}Criar Pacote{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

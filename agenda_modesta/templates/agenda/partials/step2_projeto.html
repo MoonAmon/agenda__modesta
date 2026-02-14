@@ -1,0 +1,40 @@
+<!-- Passo 2: Escolher Projeto -->
+<div class="p-4">
+  <h3 class="text-lg font-semibold mb-2">Passo 2 – Escolha o Projeto</h3>
+  <p class="text-sm text-gray-500 mb-4">
+    Cliente: <strong>{{ cliente.nome }}</strong>
+  </p>
+  <form
+    hx-post="{% url 'agenda:step2_projeto' %}"
+    hx-target="#modal-content"
+    hx-swap="innerHTML"
+  >
+    {% csrf_token %}
+    <input type="hidden" name="cliente_id" value="{{ cliente.pk }}" />
+    <div class="mb-4">
+      <label
+        for="id_projeto"
+        class="block text-sm font-medium text-gray-700 mb-1"
+        >Projeto (opcional)</label
+      >
+      {{ form.projeto }}
+    </div>
+    <div class="flex justify-end gap-2">
+      <button
+        type="button"
+        hx-get="{% url 'agenda:novo_agendamento' %}"
+        hx-target="#modal-content"
+        hx-swap="innerHTML"
+        class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-50"
+      >
+        &larr; Voltar
+      </button>
+      <button
+        type="submit"
+        class="px-4 py-2 bg-indigo-600 text-white rounded hover:bg-indigo-700"
+      >
+        Próximo &rarr;
+      </button>
+    </div>
+  </form>
+</div>

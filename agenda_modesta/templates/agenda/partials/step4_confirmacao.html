@@ -1,0 +1,77 @@
+<!-- Passo 4: Confirmação -->
+<div class="p-4">
+  <h3 class="text-lg font-semibold mb-4">Passo 4 – Confirmação</h3>
+
+  <div class="bg-gray-50 rounded p-4 mb-4 space-y-2 text-sm">
+    <p>
+      <span class="font-medium text-gray-600">Cliente:</span> {{ cliente.nome }}
+    </p>
+    {% if projeto %}
+    <p>
+      <span class="font-medium text-gray-600">Projeto:</span> {{ projeto.nome }}
+    </p>
+    {% endif %}
+    <p><span class="font-medium text-gray-600">Título:</span> {{ titulo }}</p>
+    {% if descricao %}
+    <p>
+      <span class="font-medium text-gray-600">Descrição:</span> {{ descricao }}
+    </p>
+    {% endif %}
+    <p>
+      <span class="font-medium text-gray-600">Início:</span> {{
+      data_inicio|date:"d/m/Y H:i" }}
+    </p>
+    <p>
+      <span class="font-medium text-gray-600">Fim:</span> {{
+      data_fim|date:"d/m/Y H:i" }}
+    </p>
+    {% if local %}
+    <p><span class="font-medium text-gray-600">Local:</span> {{ local }}</p>
+    {% endif %}
+  </div>
+
+  <form
+    hx-post="{% url 'agenda:step4_confirmar' %}"
+    hx-target="#modal-content"
+    hx-swap="innerHTML"
+  >
+    {% csrf_token %}
+    <input type="hidden" name="cliente_id" value="{{ cliente.pk }}" />
+    {% if projeto %}<input
+      type="hidden"
+      name="projeto_id"
+      value="{{ projeto.pk }}"
+    />{% endif %}
+    <input type="hidden" name="titulo" value="{{ titulo }}" />
+    <input type="hidden" name="descricao" value="{{ descricao }}" />
+    <input
+      type="hidden"
+      name="data_inicio"
+      value="{{ data_inicio|date:'Y-m-d\TH:i' }}"
+    />
+    <input
+      type="hidden"
+      name="data_fim"
+      value="{{ data_fim|date:'Y-m-d\TH:i' }}"
+    />
+    <input type="hidden" name="local" value="{{ local }}" />
+
+    <div class="flex justify-end gap-2">
+      <button
+        type="button"
+        hx-get="{% url 'agenda:novo_agendamento' %}"
+        hx-target="#modal-content"
+        hx-swap="innerHTML"
+        class="px-4 py-2 border rounded text-gray-600 hover:bg-gray-50"
+      >
+        &larr; Voltar
+      </button>
+      <button
+        type="submit"
+        class="px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700"
+      >
+        Confirmar agendamento
+      </button>
+    </div>
+  </form>
+</div>

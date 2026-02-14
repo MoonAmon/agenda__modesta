@@ -1,0 +1,93 @@
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  {% for projeto in projetos %}
+  <div class="card hover:shadow-md transition-shadow" id="projeto-{{ projeto.id }}">
+    <div class="card-body">
+      <div class="flex items-start justify-between mb-4">
+        <div>
+          <h3 class="font-semibold text-gray-900">{{ projeto.nome }}</h3>
+          <p class="text-sm text-gray-500">{{ projeto.cliente.nome }}</p>
+        </div>
+        <span class="badge {% if projeto.status == 'EM_ANDAMENTO' %}badge-info{% elif projeto.status == 'CONCLUIDO' %}badge-success{% elif projeto.status == 'CANCELADO' %}badge-danger{% else %}badge-gray{% endif %}">
+          {{ projeto.get_status_display }}
+        </span>
+      </div>
+
+      {% if projeto.descricao %}
+      <p class="text-sm text-gray-600 mb-4 line-clamp-2">{{ projeto.descricao }}</p>
+      {% endif %}
+
+      <div class="flex items-center gap-4 text-xs text-gray-500 mb-4">
+        {% if projeto.data_inicio %}
+        <div class="flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+          </svg>
+          <span>{{ projeto.data_inicio|date:"d/m/Y" }}</span>
+        </div>
+        {% endif %}
+        {% if projeto.data_prevista_conclusao %}
+        <div class="flex items-center gap-1">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+          </svg>
+          <span>{{ projeto.data_prevista_conclusao|date:"d/m/Y" }}</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="flex items-center justify-end gap-2 pt-4 border-t border-gray-100">
+        <a href="{% url 'projects:detail' projeto.id %}"
+           class="text-gray-400 hover:text-gray-600" title="Ver detalhes">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+          </svg>
+        </a>
+        <a href="{% url 'projects:edit' projeto.id %}"
+           class="text-gray-400 hover:text-primary-600" title="Editar">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+          </svg>
+        </a>
+        <button hx-delete="{% url 'projects:delete' projeto.id %}"
+                hx-target="#projeto-{{ projeto.id }}"
+                hx-swap="outerHTML"
+                hx-confirm="Tem certeza que deseja excluir este projeto?"
+                class="text-gray-400 hover:text-red-600" title="Excluir">
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+  {% empty %}
+  <div class="col-span-full">
+    <div class="card">
+      <div class="card-body text-center py-12">
+        <svg class="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+        <p class="text-gray-500 mb-4">Nenhum projeto encontrado</p>
+        <a href="{% url 'projects:create' %}" class="btn btn-primary">Criar Primeiro Projeto</a>
+      </div>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+
+{% if projetos.has_other_pages %}
+<div class="mt-6 flex items-center justify-between">
+  <p class="text-sm text-gray-500">
+    Mostrando {{ projetos.start_index }} - {{ projetos.end_index }} de {{ projetos.paginator.count }} projetos
+  </p>
+  <div class="flex gap-2">
+    {% if projetos.has_previous %}
+    <a href="?page={{ projetos.previous_page_number }}" class="btn btn-secondary">Anterior</a>
+    {% endif %}
+    {% if projetos.has_next %}
+    <a href="?page={{ projetos.next_page_number }}" class="btn btn-secondary">Próximo</a>
+    {% endif %}
+  </div>
+</div>
+{% endif %}

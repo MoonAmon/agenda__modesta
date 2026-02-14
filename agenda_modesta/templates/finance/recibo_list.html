@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Recibos - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Recibos</h1>
+    <p class="text-gray-500 mt-1">Gerencie seus recibos emitidos</p>
+  </div>
+  <a href="{% url 'finance:recibo_create' %}" class="btn btn-primary">
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+    </svg>
+    Novo Recibo
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+  <div class="stat-card">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="stat-value">{{ total_recibos }}</p>
+        <p class="stat-label">Total de Recibos</p>
+      </div>
+      <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="stat-value text-green-600">R$ {{ valor_total|default:"0,00" }}</p>
+        <p class="stat-label">Valor Total Emitido</p>
+      </div>
+      <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-6">
+  <div class="card-body">
+    <form method="get" class="flex flex-wrap gap-4">
+      <div class="flex-1 min-w-[200px]">
+        <input type="text"
+               name="q"
+               value="{{ request.GET.q }}"
+               placeholder="Buscar por número ou cliente..."
+               class="form-input"
+               hx-get="{% url 'finance:recibos' %}"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#recibos-table"
+               hx-swap="innerHTML">
+      </div>
+      <div>
+        <select name="cliente" class="form-input" onchange="this.form.submit()">
+          <option value="">Todos os Clientes</option>
+          {% for cliente in clientes %}
+          <option value="{{ cliente.id }}" {% if request.GET.cliente == cliente.id|stringformat:"s" %}selected{% endif %}>{{ cliente.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <input type="month"
+               name="mes"
+               value="{{ request.GET.mes }}"
+               class="form-input"
+               onchange="this.form.submit()">
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Recibos Table -->
+<div class="card">
+  <div class="table-container" id="recibos-table">
+    {% include "finance/partials/recibo_table.html" %}
+  </div>
+</div>
+{% endblock %}

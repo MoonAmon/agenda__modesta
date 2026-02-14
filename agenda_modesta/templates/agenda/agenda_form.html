@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}{% if agenda %}Editar{% else %}Novo{% endif %} Agendamento - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{% if agenda %}Editar Agendamento{% else %}Novo Agendamento{% endif %}</h1>
+    <p class="text-gray-500 mt-1">{% if agenda %}Atualize os dados do agendamento{% else %}Preencha os dados do novo agendamento{% endif %}</p>
+  </div>
+</div>
+
+<div class="card max-w-2xl">
+  <div class="card-body">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group md:col-span-2">
+          <label for="id_titulo" class="form-label">Título *</label>
+          <input type="text"
+                 id="id_titulo"
+                 name="titulo"
+                 value="{{ form.titulo.value|default:'' }}"
+                 class="form-input {% if form.titulo.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.titulo.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.titulo.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_descricao" class="form-label">Descrição</label>
+          <textarea id="id_descricao"
+                    name="descricao"
+                    rows="3"
+                    class="form-input">{{ form.descricao.value|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="id_data_inicio" class="form-label">Data/Hora Início *</label>
+          <input type="datetime-local"
+                 id="id_data_inicio"
+                 name="data_inicio"
+                 value="{{ form.data_inicio.value|date:'Y-m-d\TH:i'|default:'' }}"
+                 class="form-input {% if form.data_inicio.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.data_inicio.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.data_inicio.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_data_fim" class="form-label">Data/Hora Fim *</label>
+          <input type="datetime-local"
+                 id="id_data_fim"
+                 name="data_fim"
+                 value="{{ form.data_fim.value|date:'Y-m-d\TH:i'|default:'' }}"
+                 class="form-input {% if form.data_fim.errors %}border-red-500{% endif %}"
+                 required>
+          {% if form.data_fim.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.data_fim.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_projeto" class="form-label">Projeto *</label>
+          <select id="id_projeto"
+                  name="projeto"
+                  class="form-input {% if form.projeto.errors %}border-red-500{% endif %}"
+                  required>
+            <option value="">Selecione um projeto...</option>
+            {% for projeto in projetos %}
+            <option value="{{ projeto.id }}" {% if form.projeto.value == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }} ({{ projeto.cliente.nome }})</option>
+            {% endfor %}
+          </select>
+          {% if form.projeto.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.projeto.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_local" class="form-label">Local</label>
+          <input type="text"
+                 id="id_local"
+                 name="local"
+                 value="{{ form.local.value|default:'' }}"
+                 class="form-input"
+                 placeholder="Ex: Sala de reunião, Online, etc.">
+        </div>
+
+        <!-- Google Calendar Integration -->
+        <div class="form-group md:col-span-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div class="flex items-start gap-3">
+            <svg class="w-6 h-6 text-blue-600 mt-0.5" viewBox="0 0 24 24">
+              <path fill="currentColor" d="M19.5 22H4.5C3.12 22 2 20.88 2 19.5V4.5C2 3.12 3.12 2 4.5 2H19.5C20.88 2 22 3.12 22 4.5V19.5C22 20.88 20.88 22 19.5 22M6 6V8H8V6H6M10 6V8H18V6H10M6 10V12H8V10H6M10 10V12H18V10H10M6 14V16H8V14H6M10 14V16H18V14H10Z"/>
+            </svg>
+            <div class="flex-1">
+              <h4 class="font-medium text-blue-900">Integração Google Calendar</h4>
+              <p class="text-sm text-blue-700 mt-1">Sincronize este agendamento com seu Google Calendar</p>
+              <label class="flex items-center gap-2 cursor-pointer mt-3">
+                <input type="checkbox"
+                       name="sincronizar_google"
+                       {% if form.sincronizar_google.value %}checked{% endif %}
+                       class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                <span class="text-sm text-blue-900">Enviar para Google Calendar</span>
+              </label>
+            </div>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox"
+                   name="confirmado"
+                   {% if form.confirmado.value %}checked{% endif %}
+                   class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+            <span class="text-sm text-gray-700">Agendamento confirmado</span>
+          </label>
+        </div>
+
+        <div class="form-group">
+          <label class="flex items-center gap-2 cursor-pointer">
+            <input type="checkbox"
+                   name="notificar_email"
+                   {% if form.notificar_email.value %}checked{% endif %}
+                   class="w-4 h-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500">
+            <span class="text-sm text-gray-700">Enviar notificação por email</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+        <a href="{% url 'agenda:list' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          {% if agenda %}Salvar Alterações{% else %}Criar Agendamento{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

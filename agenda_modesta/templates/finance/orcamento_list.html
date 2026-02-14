@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Orçamentos - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">Orçamentos</h1>
+    <p class="text-gray-500 mt-1">Gerencie seus orçamentos</p>
+  </div>
+  <a href="{% url 'finance:orcamento_create' %}" class="btn btn-primary">
+    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+    </svg>
+    Novo Orçamento
+  </a>
+</div>
+
+<!-- Stats -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+  <div class="stat-card">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="stat-value">{{ total_orcamentos }}</p>
+        <p class="stat-label">Total de Orçamentos</p>
+      </div>
+      <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="stat-value text-yellow-600">R$ {{ valor_pendente|default:"0,00" }}</p>
+        <p class="stat-label">Valor Pendente</p>
+      </div>
+      <div class="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center justify-between">
+      <div>
+        <p class="stat-value text-green-600">R$ {{ valor_pago|default:"0,00" }}</p>
+        <p class="stat-label">Valor Recebido</p>
+      </div>
+      <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Filters -->
+<div class="card mb-6">
+  <div class="card-body">
+    <form method="get" class="flex flex-wrap gap-4">
+      <div class="flex-1 min-w-[200px]">
+        <input type="text"
+               name="q"
+               value="{{ request.GET.q }}"
+               placeholder="Buscar por número ou cliente..."
+               class="form-input"
+               hx-get="{% url 'finance:orcamentos' %}"
+               hx-trigger="keyup changed delay:500ms"
+               hx-target="#orcamentos-table"
+               hx-swap="innerHTML">
+      </div>
+      <div>
+        <select name="status" class="form-input" onchange="this.form.submit()">
+          <option value="">Todos os Status</option>
+          <option value="pendente" {% if request.GET.status == 'pendente' %}selected{% endif %}>Pendente</option>
+          <option value="pago" {% if request.GET.status == 'pago' %}selected{% endif %}>Pago</option>
+        </select>
+      </div>
+      <div>
+        <select name="cliente" class="form-input" onchange="this.form.submit()">
+          <option value="">Todos os Clientes</option>
+          {% for cliente in clientes %}
+          <option value="{{ cliente.id }}" {% if request.GET.cliente == cliente.id|stringformat:"s" %}selected{% endif %}>{{ cliente.nome }}</option>
+          {% endfor %}
+        </select>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Orcamentos Table -->
+<div class="card">
+  <div class="table-container" id="orcamentos-table">
+    {% include "finance/partials/orcamento_table.html" %}
+  </div>
+</div>
+{% endblock %}

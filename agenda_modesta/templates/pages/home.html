@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Dashboard - Agenda Modesta{% endblock %}
+
+{% block javascript %}
+{{ block.super }}
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.15/index.global.min.js"></script>
+{% endblock javascript %}
+
+{% block content %}
+<div class="page-header">
+  <h1 class="page-title">Dashboard</h1>
+</div>
+
+<!-- Stats Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+  <div class="stat-card">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-lg bg-blue-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="stat-value">{{ total_clientes }}</p>
+        <p class="stat-label">Clientes</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-lg bg-green-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="stat-value">{{ projetos_andamento }}</p>
+        <p class="stat-label">Projetos em Andamento</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-lg bg-yellow-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="stat-value">{{ agendamentos_hoje }}</p>
+        <p class="stat-label">Agendamentos Hoje</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="stat-card">
+    <div class="flex items-center gap-4">
+      <div class="w-12 h-12 rounded-lg bg-purple-100 flex items-center justify-center">
+        <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+        </svg>
+      </div>
+      <div>
+        <p class="stat-value">R$ {{ orcamentos_pendentes_valor|default:"0,00" }}</p>
+        <p class="stat-label">Orçamentos Pendentes</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Calendário Semanal -->
+{% include "components/weekly_calendar.html" %}
+
+<!-- Quick Actions -->
+<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+  <!-- Recent Appointments -->
+  <div class="card">
+    <div class="card-header flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-gray-900">Próximos Agendamentos</h2>
+      <a href="{% url 'agenda:list' %}" class="text-sm text-primary-600 hover:text-primary-700">Ver todos</a>
+    </div>
+    <div class="card-body">
+      {% if proximos_agendamentos %}
+      <ul class="space-y-3">
+        {% for agenda in proximos_agendamentos %}
+        <li class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50">
+          <div class="w-12 h-12 rounded-lg bg-primary-100 flex flex-col items-center justify-center text-primary-700">
+            <span class="text-xs font-medium">{{ agenda.data_inicio|date:"M" }}</span>
+            <span class="text-lg font-bold leading-none">{{ agenda.data_inicio|date:"d" }}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 truncate">{{ agenda.titulo }}</p>
+            <p class="text-xs text-gray-500">{{ agenda.data_inicio|date:"H:i" }} - {{ agenda.projeto.cliente.nome|default:"Sem cliente" }}</p>
+          </div>
+          {% if agenda.confirmado %}
+          <span class="badge badge-success">Confirmado</span>
+          {% else %}
+          <span class="badge badge-warning">Pendente</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-gray-500 text-center py-8">Nenhum agendamento próximo</p>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Recent Orcamentos -->
+  <div class="card">
+    <div class="card-header flex items-center justify-between">
+      <h2 class="text-lg font-semibold text-gray-900">Orçamentos Recentes</h2>
+      <a href="{% url 'finance:orcamentos' %}" class="text-sm text-primary-600 hover:text-primary-700">Ver todos</a>
+    </div>
+    <div class="card-body">
+      {% if orcamentos_recentes %}
+      <ul class="space-y-3">
+        {% for orcamento in orcamentos_recentes %}
+        <li class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50">
+          <div class="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center text-gray-600">
+            <span class="text-sm font-bold">#{{ orcamento.numero_sequencial }}</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-medium text-gray-900 truncate">{{ orcamento.cliente.nome }}</p>
+            <p class="text-xs text-gray-500">R$ {{ orcamento.valor_total }}</p>
+          </div>
+          {% if orcamento.status_pagamento == 'pago' %}
+          <span class="badge badge-success">Pago</span>
+          {% else %}
+          <span class="badge badge-warning">Pendente</span>
+          {% endif %}
+        </li>
+        {% endfor %}
+      </ul>
+      {% else %}
+      <p class="text-gray-500 text-center py-8">Nenhum orçamento recente</p>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Quick Actions Buttons -->
+<div class="card">
+  <div class="card-header">
+    <h2 class="text-lg font-semibold text-gray-900">Ações Rápidas</h2>
+  </div>
+  <div class="card-body">
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <a href="{% url 'clients:create' %}" class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"></path>
+          </svg>
+        </div>
+        <span class="text-sm font-medium text-gray-700">Novo Cliente</span>
+      </a>
+
+      <a href="{% url 'projects:create' %}" class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 13h6m-3-3v6m5 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <span class="text-sm font-medium text-gray-700">Novo Projeto</span>
+      </a>
+
+      <a href="{% url 'agenda:create' %}" class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-yellow-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+          </svg>
+        </div>
+        <span class="text-sm font-medium text-gray-700">Novo Agendamento</span>
+      </a>
+
+      <a href="{% url 'finance:orcamento_create' %}" class="flex flex-col items-center gap-2 p-4 rounded-lg border border-gray-200 hover:border-primary-300 hover:bg-primary-50 transition-colors">
+        <div class="w-10 h-10 rounded-full bg-purple-100 flex items-center justify-center">
+          <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+          </svg>
+        </div>
+        <span class="text-sm font-medium text-gray-700">Novo Orçamento</span>
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,195 @@
+{% extends "base.html" %}
+
+{% block title %}{% if orcamento %}Editar{% else %}Novo{% endif %} Orçamento - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div>
+    <h1 class="page-title">{% if orcamento %}Editar Orçamento #{{ orcamento.numero_sequencial }}{% else %}Novo Orçamento{% endif %}</h1>
+    <p class="text-gray-500 mt-1">{% if orcamento %}Atualize os dados do orçamento{% else %}Preencha os dados do novo orçamento{% endif %}</p>
+  </div>
+</div>
+
+<div class="card max-w-3xl">
+  <div class="card-body">
+    <form method="post" class="space-y-6">
+      {% csrf_token %}
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="form-group">
+          <label for="id_cliente" class="form-label">Cliente *</label>
+          <select id="id_cliente"
+                  name="cliente"
+                  class="form-input {% if form.cliente.errors %}border-red-500{% endif %}"
+                  required>
+            <option value="">Selecione um cliente...</option>
+            {% for cliente in clientes %}
+            <option value="{{ cliente.id }}" {% if form.cliente.value == cliente.id|stringformat:"s" or cliente_selecionado == cliente.id %}selected{% endif %}>{{ cliente.nome }}</option>
+            {% endfor %}
+          </select>
+          {% if form.cliente.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.cliente.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_projeto" class="form-label">Projeto</label>
+          <select id="id_projeto"
+                  name="projeto"
+                  class="form-input">
+            <option value="">Selecione um projeto...</option>
+            {% for projeto in projetos %}
+            <option value="{{ projeto.id }}" {% if form.projeto.value == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }}</option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="id_pacote" class="form-label">Pacote de Serviço</label>
+          <select id="id_pacote"
+                  name="pacote"
+                  class="form-input"
+                  hx-get="{% url 'finance:get_pacote_info' %}"
+                  hx-trigger="change"
+                  hx-target="#pacote-info">
+            <option value="">Sem pacote (hora avulsa)</option>
+            {% for pacote in pacotes %}
+            <option value="{{ pacote.id }}"
+                    {% if form.pacote.value == pacote.id|stringformat:"s" %}selected{% endif %}
+                    data-horas="{{ pacote.horas_inclusas }}"
+                    data-valor="{{ pacote.valor_hora_pacote }}">
+              {{ pacote.nome }}
+            </option>
+            {% endfor %}
+          </select>
+          <div id="pacote-info" class="mt-2"></div>
+        </div>
+
+        <div class="form-group md:col-span-2">
+          <label for="id_descricao" class="form-label">Descrição do Serviço</label>
+          <textarea id="id_descricao"
+                    name="descricao"
+                    rows="3"
+                    class="form-input"
+                    placeholder="Descreva os serviços inclusos neste orçamento...">{{ form.descricao.value|default:'' }}</textarea>
+        </div>
+
+        <div class="form-group">
+          <label for="id_horas_trabalhadas" class="form-label">Horas *</label>
+          <input type="number"
+                 id="id_horas_trabalhadas"
+                 name="horas_trabalhadas"
+                 value="{{ form.horas_trabalhadas.value|default:'' }}"
+                 step="0.5"
+                 min="0.5"
+                 class="form-input {% if form.horas_trabalhadas.errors %}border-red-500{% endif %}"
+                 required
+                 x-on:input="calcularTotal()">
+          {% if form.horas_trabalhadas.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.horas_trabalhadas.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_valor_hora" class="form-label">Valor/Hora (R$) *</label>
+          <input type="number"
+                 id="id_valor_hora"
+                 name="valor_hora"
+                 value="{{ form.valor_hora.value|default:'' }}"
+                 step="0.01"
+                 min="0"
+                 class="form-input {% if form.valor_hora.errors %}border-red-500{% endif %}"
+                 required
+                 x-on:input="calcularTotal()">
+          {% if form.valor_hora.errors %}
+          <p class="text-red-500 text-sm mt-1">{{ form.valor_hora.errors.0 }}</p>
+          {% endif %}
+        </div>
+
+        <div class="form-group">
+          <label for="id_valor_total" class="form-label">Valor Total (R$)</label>
+          <input type="number"
+                 id="id_valor_total"
+                 name="valor_total"
+                 value="{{ form.valor_total.value|default:'' }}"
+                 step="0.01"
+                 class="form-input bg-gray-50 font-bold text-lg"
+                 readonly>
+        </div>
+
+        <div class="form-group">
+          <label for="id_forma_pagamento" class="form-label">Forma de Pagamento *</label>
+          <select id="id_forma_pagamento"
+                  name="forma_pagamento"
+                  class="form-input"
+                  required>
+            <option value="pix" {% if form.forma_pagamento.value == 'pix' %}selected{% endif %}>Pix</option>
+            <option value="dinheiro" {% if form.forma_pagamento.value == 'dinheiro' %}selected{% endif %}>Dinheiro</option>
+            <option value="cartao" {% if form.forma_pagamento.value == 'cartao' %}selected{% endif %}>Cartão</option>
+            <option value="transferencia" {% if form.forma_pagamento.value == 'transferencia' %}selected{% endif %}>Transferência</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="id_status_pagamento" class="form-label">Status do Pagamento</label>
+          <select id="id_status_pagamento"
+                  name="status_pagamento"
+                  class="form-input">
+            <option value="pendente" {% if form.status_pagamento.value == 'pendente' %}selected{% endif %}>Pendente</option>
+            <option value="pago" {% if form.status_pagamento.value == 'pago' %}selected{% endif %}>Pago</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="id_data_validade" class="form-label">Validade do Orçamento</label>
+          <input type="date"
+                 id="id_data_validade"
+                 name="data_validade"
+                 value="{{ form.data_validade.value|date:'Y-m-d'|default:'' }}"
+                 class="form-input">
+        </div>
+
+        <!-- Email Integration -->
+        <div class="form-group md:col-span-2 p-4 bg-blue-50 rounded-lg border border-blue-200">
+          <div class="flex items-start gap-3">
+            <svg class="w-6 h-6 text-blue-600 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            <div class="flex-1">
+              <h4 class="font-medium text-blue-900">Enviar por Email</h4>
+              <p class="text-sm text-blue-700 mt-1">Envie o orçamento diretamente para o email do cliente</p>
+              <label class="flex items-center gap-2 cursor-pointer mt-3">
+                <input type="checkbox"
+                       name="enviar_email"
+                       class="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                <span class="text-sm text-blue-900">Enviar orçamento por email após salvar</span>
+              </label>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end gap-3 pt-6 border-t border-gray-200">
+        <a href="{% url 'finance:orcamentos' %}" class="btn btn-secondary">Cancelar</a>
+        <button type="submit" class="btn btn-primary">
+          {% if orcamento %}Salvar Alterações{% else %}Criar Orçamento{% endif %}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>
+
+{% block inline_javascript %}
+<script>
+function calcularTotal() {
+  const horas = parseFloat(document.getElementById('id_horas_trabalhadas').value) || 0;
+  const valorHora = parseFloat(document.getElementById('id_valor_hora').value) || 0;
+  const total = horas * valorHora;
+  document.getElementById('id_valor_total').value = total.toFixed(2);
+}
+
+// Calculate on page load
+document.addEventListener('DOMContentLoaded', calcularTotal);
+</script>
+{% endblock %}
+{% endblock %}

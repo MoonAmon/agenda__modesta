@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block title %}{{ cliente.nome }} - Agenda Modesta{% endblock %}
+
+{% block content %}
+<div class="page-header">
+  <div class="flex items-center gap-4">
+    <a href="{% url 'clients:list' %}" class="text-gray-400 hover:text-gray-600">
+      <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"></path>
+      </svg>
+    </a>
+    <div>
+      <h1 class="page-title">{{ cliente.nome }}</h1>
+      <p class="text-gray-500 mt-1">Cliente desde {{ cliente.data_criacao|date:"d/m/Y" }}</p>
+    </div>
+  </div>
+  <div class="flex gap-2">
+    <a href="{% url 'clients:edit' cliente.id %}" class="btn btn-secondary">
+      <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+      </svg>
+      Editar
+    </a>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+  <!-- Client Info -->
+  <div class="lg:col-span-1">
+    <div class="card">
+      <div class="card-header">
+        <h2 class="text-lg font-semibold text-gray-900">Informações</h2>
+      </div>
+      <div class="card-body space-y-4">
+        <div class="flex items-center gap-4">
+          <div class="w-16 h-16 rounded-full bg-primary-100 flex items-center justify-center">
+            <span class="text-2xl font-bold text-primary-700">{{ cliente.nome|slice:":1"|upper }}</span>
+          </div>
+          <div>
+            <p class="font-medium text-gray-900">{{ cliente.nome }}</p>
+            {% if cliente.ativo %}
+            <span class="badge badge-success">Ativo</span>
+            {% else %}
+            <span class="badge badge-gray">Inativo</span>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="border-t border-gray-100 pt-4 space-y-3">
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+            </svg>
+            <div>
+              <p class="text-xs text-gray-500">Email</p>
+              <a href="mailto:{{ cliente.email }}" class="text-sm text-primary-600 hover:text-primary-700">{{ cliente.email }}</a>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
+            </svg>
+            <div>
+              <p class="text-xs text-gray-500">Telefone</p>
+              <a href="tel:{{ cliente.telefone }}" class="text-sm text-gray-900">{{ cliente.telefone }}</a>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V8a2 2 0 00-2-2h-5m-4 0V5a2 2 0 114 0v1m-4 0a2 2 0 104 0m-5 8a2 2 0 100-4 2 2 0 000 4zm0 0c1.306 0 2.417.835 2.83 2M9 14a3.001 3.001 0 00-2.83 2M15 11h3m-3 4h2"></path>
+            </svg>
+            <div>
+              <p class="text-xs text-gray-500">CPF/CNPJ</p>
+              <p class="text-sm text-gray-900">{{ cliente.cpf_cnpj }}</p>
+            </div>
+          </div>
+
+          <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-gray-400 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"></path>
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"></path>
+            </svg>
+            <div>
+              <p class="text-xs text-gray-500">Endereço</p>
+              <p class="text-sm text-gray-900">{{ cliente.endereco }}</p>
+              <p class="text-sm text-gray-900">{{ cliente.cidade }}/{{ cliente.estado }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Projects and History -->
+  <div class="lg:col-span-2 space-y-6">
+    <!-- Projects -->
+    <div class="card">
+      <div class="card-header flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Projetos</h2>
+        <a href="{% url 'projects:create' %}?cliente={{ cliente.id }}" class="text-sm text-primary-600 hover:text-primary-700">
+          + Novo Projeto
+        </a>
+      </div>
+      <div class="card-body">
+        {% if cliente.projetos.all %}
+        <ul class="space-y-3">
+          {% for projeto in cliente.projetos.all %}
+          <li class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50">
+            <div>
+              <p class="font-medium text-gray-900">{{ projeto.nome }}</p>
+              <p class="text-xs text-gray-500">{{ projeto.get_status_display }}</p>
+            </div>
+            <span class="badge {% if projeto.status == 'EM_ANDAMENTO' %}badge-info{% elif projeto.status == 'CONCLUIDO' %}badge-success{% elif projeto.status == 'CANCELADO' %}badge-danger{% else %}badge-gray{% endif %}">
+              {{ projeto.get_status_display }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-center text-gray-500 py-8">Nenhum projeto cadastrado</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <!-- Recent Orcamentos -->
+    <div class="card">
+      <div class="card-header flex items-center justify-between">
+        <h2 class="text-lg font-semibold text-gray-900">Orçamentos Recentes</h2>
+        <a href="{% url 'finance:orcamento_create' %}?cliente={{ cliente.id }}" class="text-sm text-primary-600 hover:text-primary-700">
+          + Novo Orçamento
+        </a>
+      </div>
+      <div class="card-body">
+        {% if cliente.orcamentos.all %}
+        <ul class="space-y-3">
+          {% for orcamento in cliente.orcamentos.all|slice:":5" %}
+          <li class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50">
+            <div>
+              <p class="font-medium text-gray-900">Orçamento #{{ orcamento.numero_sequencial }}</p>
+              <p class="text-xs text-gray-500">R$ {{ orcamento.valor_total }} - {{ orcamento.data_emissao|date:"d/m/Y" }}</p>
+            </div>
+            {% if orcamento.status_pagamento == 'pago' %}
+            <span class="badge badge-success">Pago</span>
+            {% else %}
+            <span class="badge badge-warning">Pendente</span>
+            {% endif %}
+          </li>
+          {% endfor %}
+        </ul>
+        {% else %}
+        <p class="text-center text-gray-500 py-8">Nenhum orçamento cadastrado</p>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
