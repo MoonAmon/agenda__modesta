@@ -2,10 +2,11 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.http import HttpResponse, JsonResponse
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.http import require_http_methods, require_POST
 from django.utils import timezone
 
-from .models import Agenda
+from .models import Agenda, GoogleCalendarChannel
 from .forms import AgendaForm, StepProjetoForm, StepDetalhesForm
 from agenda_modesta.projects.models import Projeto
 from agenda_modesta.core.utils import get_user_subscritor
@@ -135,7 +136,7 @@ def novo_agendamento(request):
 @login_required
 @require_http_methods(["POST"])
 def step1_projeto(request):
-    """Recebe o projeto escolhido e retorna o passo 2 (detalhes)."""
+    """Recebe o projeto escolhido (opcional) e retorna o passo 2 (detalhes)."""
     subscritor = get_user_subscritor(request.user)
     form = StepProjetoForm(request.POST)
     projetos = Projeto.objects.filter(subscritor=subscritor, ativo=True)
@@ -144,7 +145,7 @@ def step1_projeto(request):
     if not form.is_valid():
         return render(request, "agenda/partials/step1_projeto.html", {"form": form})
 
-    projeto = form.cleaned_data["projeto"]
+    projeto = form.cleaned_data.get("projeto")  # pode ser None
     detalhes_form = StepDetalhesForm()
     return render(request, "agenda/partials/step2_detalhes.html", {
         "form": detalhes_form,
@@ -158,7 +159,9 @@ def step2_detalhes(request):
     """Recebe os detalhes e retorna o passo 3 (confirmação)."""
     subscritor = get_user_subscritor(request.user)
     projeto_id = request.POST.get("projeto_id")
-    projeto = get_object_or_404(Projeto, pk=projeto_id, subscritor=subscritor)
+    projeto = None
+    if projeto_id:
+        projeto = get_object_or_404(Projeto, pk=projeto_id, subscritor=subscritor)
 
     form = StepDetalhesForm(request.POST)
     if not form.is_valid():
@@ -183,7 +186,9 @@ def step3_confirmar(request):
     """Salva o agendamento definitivamente."""
     subscritor = get_user_subscritor(request.user)
     projeto_id = request.POST.get("projeto_id")
-    projeto = get_object_or_404(Projeto, pk=projeto_id, subscritor=subscritor)
+    projeto = None
+    if projeto_id:
+        projeto = get_object_or_404(Projeto, pk=projeto_id, subscritor=subscritor)
 
     form = StepDetalhesForm(request.POST)
     if not form.is_valid():
@@ -269,6 +274,7 @@ def agenda_week_json(request):
             "client": a.projeto.cliente.nome if a.projeto and a.projeto.cliente else "",
             "location": a.local or "",
             "day": a.data_inicio.weekday(),  # 0=Mon, 6=Sun
+            "origem": a.origem,
         })
 
     return JsonResponse({
@@ -276,3 +282,123 @@ def agenda_week_json(request):
         "week_end": week_end.isoformat(),
         "events": events,
     })
+
+
+# ============ Google Calendar – Webhook & Sync ============
+
+import logging
+
+_gc_logger = logging.getLogger(__name__)
+
+
+@csrf_exempt
+@require_POST
+def google_calendar_webhook(request):
+    """
+    Endpoint que o Google Calendar chama via push notification quando
+    há alterações no calendário.
+    Headers relevantes:
+      X-Goog-Channel-ID   – ID do canal (nosso channel_id)
+      X-Goog-Resource-ID  – ID do recurso
+      X-Goog-Resource-State – "sync" (handshake) ou "exists" (mudança)
+    """
+    channel_id = request.headers.get("X-Goog-Channel-ID", "")
+    resource_state = request.headers.get("X-Goog-Resource-State", "")
+
+    _gc_logger.info(
+        "Webhook recebido: channel=%s state=%s",
+        channel_id,
+        resource_state,
+    )
+
+    # Handshake inicial do Google → apenas responder 200
+    if resource_state == "sync":
+        return HttpResponse(status=200)
+
+    # Buscar o canal registrado
+    try:
+        channel = GoogleCalendarChannel.objects.select_related("subscritor").get(
+            channel_id=channel_id,
+        )
+    except GoogleCalendarChannel.DoesNotExist:
+        _gc_logger.warning("Webhook de canal desconhecido: %s", channel_id)
+        return HttpResponse(status=200)  # responder 200 para não reenviar
+
+    # Disparar sincronização via Celery (não bloquear a resposta)
+    from agenda_modesta.notifications.tasks import sincronizar_google_calendar
+
+    sincronizar_google_calendar.delay(
+        str(channel.subscritor.pk),
+        channel.sync_token,
+    )
+
+    return HttpResponse(status=200)
+
+
+@login_required
+@require_POST
+def registrar_google_sync(request):
+    """
+    Ação do admin/UI para registrar o webhook do Google Calendar
+    e fazer a primeira sincronização completa.
+    """
+    from .google_calendar import registrar_webhook, sincronizar_eventos_google
+
+    subscritor = get_user_subscritor(request.user)
+
+    try:
+        result = registrar_webhook(subscritor)
+
+        # Primeira sincronização completa (sem sync_token)
+        new_token = sincronizar_eventos_google(
+            subscritor=subscritor,
+            usuario=request.user,
+            sync_token="",
+        )
+
+        # Salvar o sync_token no canal
+        GoogleCalendarChannel.objects.filter(
+            channel_id=result["channel_id"],
+        ).update(sync_token=new_token)
+
+        messages.success(
+            request,
+            f"Sincronização com Google Calendar ativada! "
+            f"Expira em {result['expiration']:%d/%m/%Y %H:%M}.",
+        )
+    except Exception as exc:
+        _gc_logger.exception("Erro ao registrar webhook Google")
+        messages.error(request, f"Erro ao ativar sincronização: {exc}")
+
+    return redirect("agenda:list")
+
+
+@login_required
+@require_POST
+def sincronizar_google_agora(request):
+    """Força uma sincronização imediata Google → App."""
+    from .google_calendar import sincronizar_eventos_google
+
+    subscritor = get_user_subscritor(request.user)
+
+    channel = GoogleCalendarChannel.objects.filter(
+        subscritor=subscritor,
+    ).order_by("-criado_em").first()
+
+    sync_token = channel.sync_token if channel else ""
+
+    try:
+        new_token = sincronizar_eventos_google(
+            subscritor=subscritor,
+            usuario=request.user,
+            sync_token=sync_token,
+        )
+        if channel:
+            channel.sync_token = new_token
+            channel.save(update_fields=["sync_token"])
+        messages.success(request, "Sincronização concluída com sucesso!")
+    except Exception as exc:
+        _gc_logger.exception("Erro na sincronização manual")
+        messages.error(request, f"Erro na sincronização: {exc}")
+
+    return redirect("agenda:list")

@@ -17,3 +17,5 @@ CELERY_FLOWER_PASSWORD=debug
 # ------------------------------------------------------------------------------
 GOOGLE_CALENDAR_ID=misterofclans.mo@gmail.com
 GOOGLE_CALENDAR_CREDENTIALS_FILE=/app/google-credentials.json
+GOOGLE_CALENDAR_WEBHOOK_URL=https://e69f-2804-8aa4-3e57-ab00-ccce-4e62-ff88-cb41.ngrok-free.app/agenda/google/webhook/
+CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]

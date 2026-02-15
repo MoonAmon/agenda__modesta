@@ -29,15 +29,21 @@ class AgendaForm(forms.ModelForm):
             'notificar_email': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
         }
 
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['projeto'].required = False
+        self.fields['projeto'].empty_label = "Sem projeto (opcional)"
+
 
 # ---------- Formulários HTMX em passos ----------
 
 class StepProjetoForm(forms.Form):
-    """Passo 1 – escolher projeto (obrigatório)."""
+    """Passo 1 – escolher projeto (agora opcional)."""
     projeto = forms.ModelChoiceField(
         queryset=Projeto.objects.none(),
         label="Projeto",
-        required=True,
+        required=False,
+        empty_label="Sem projeto (opcional)",
         widget=forms.Select(attrs={"class": "form-input"}),
     )
 

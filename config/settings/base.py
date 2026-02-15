@@ -235,6 +235,7 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
 X_FRAME_OPTIONS = "DENY"
+CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]  # noqa: S104
 
 # EMAIL
 # ------------------------------------------------------------------------------
@@ -375,6 +376,8 @@ GOOGLE_CALENDAR_SCOPES = ["https://www.googleapis.com/auth/calendar"]
 GOOGLE_CALENDAR_ID = env.str("GOOGLE_CALENDAR_ID", default="")
 GOOGLE_CALENDAR_CREDENTIALS_FILE = env.str("GOOGLE_CALENDAR_CREDENTIALS_FILE", default="")
 GOOGLE_CALENDAR_CREDENTIALS_JSON = env.str("GOOGLE_CALENDAR_CREDENTIALS_JSON", default="")
+GOOGLE_CALENDAR_WEBHOOK_URL = env.str("GOOGLE_CALENDAR_WEBHOOK_URL", default="")
+GOOGLE_CALENDAR_TIMEZONE = env.str("GOOGLE_CALENDAR_TIMEZONE", default="America/Sao_Paulo")
 
 # EMAIL
 # ------------------------------------------------------------------------------

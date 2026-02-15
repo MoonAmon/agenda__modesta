@@ -16,4 +16,8 @@ urlpatterns = [
     path('step3/', views.step3_confirmar, name='step3_confirmar'),
     path('projetos-por-cliente/', views.projetos_por_cliente, name='projetos_por_cliente'),
     path('api/week/', views.agenda_week_json, name='week_json'),
+    # Google Calendar – bilateral sync
+    path('google/webhook/', views.google_calendar_webhook, name='google_webhook'),
+    path('google/registrar/', views.registrar_google_sync, name='google_registrar'),
+    path('google/sincronizar/', views.sincronizar_google_agora, name='google_sincronizar'),
 ]

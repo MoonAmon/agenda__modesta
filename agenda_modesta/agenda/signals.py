@@ -50,12 +50,12 @@ def sync_agenda_to_scheduler(sender, instance, created, **kwargs):
     # Cores por status
     color = "#10b981" if instance.confirmado else "#f59e0b"  # green / amber
 
-    # Título com nome do cliente (via projeto)
+    # Título com nome do cliente (via projeto, se existir)
     title = instance.titulo
     if instance.projeto and instance.projeto.cliente:
         title = f"{instance.titulo} – {instance.projeto.cliente.nome}"
 
-    # Tentar encontrar evento existente vinculado via EventRelation ou por campo extra
+    # Tentar encontrar evento existente vinculado
     existing = ScheduleEvent.objects.filter(
         calendar=cal,
         description__contains=f"agenda_id:{instance.pk}",
@@ -93,13 +93,17 @@ def delete_agenda_from_scheduler(sender, instance, **kwargs):
 
 
 # ---------------------------------------------------------------------------
-# Google Calendar – sync
+# Google Calendar – sync (App → Google)
 # ---------------------------------------------------------------------------
 
 
 @receiver(post_save, sender=Agenda)
 def sync_agenda_google(sender, instance, created, **kwargs):
     """Cria ou atualiza evento no Google Calendar ao salvar Agenda."""
+    # Evita loop: se o save veio do webhook não reenviar para o Google
+    if getattr(instance, "_skip_google_sync", False):
+        return
+
     if not _google_calendar_enabled():
         return
 
