@@ -22,6 +22,7 @@ dependencies = [
     { name = "django-model-utils" },
     { name = "django-money" },
     { name = "django-redis" },
+    { name = "django-scheduler" },
     { name = "django-simple-history" },
     { name = "django-tailwind" },
     { name = "djangorestframework" },
@@ -80,6 +81,7 @@ requires-dist = [
     { name = "django-model-utils", specifier = "==5.0.0" },
     { name = "django-money", specifier = ">=3.0" },
     { name = "django-redis", specifier = "==6.0.0" },
+    { name = "django-scheduler", specifier = ">=0.10.0" },
     { name = "django-simple-history", specifier = ">=3.0" },
     { name = "django-tailwind", specifier = ">=3.0" },
     { name = "djangorestframework", specifier = "==3.16.1" },
@@ -723,6 +725,21 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/08/53/dbcfa1e528e0d6c39947092625b2c89274b5d88f14d357cee53c4d6dbbd4/django_redis-6.0.0.tar.gz", hash = "sha256:2d9cb12a20424a4c4dde082c6122f486628bae2d9c2bee4c0126a4de7fda00dd", size = 56904, upload-time = "2025-06-17T18:15:46.376Z" }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/7e/79/055dfcc508cfe9f439d9f453741188d633efa9eab90fc78a67b0ab50b137/django_redis-6.0.0-py3-none-any.whl", hash = "sha256:20bf0063a8abee567eb5f77f375143c32810c8700c0674ced34737f8de4e36c0", size = 33687, upload-time = "2025-06-17T18:15:34.165Z" },
+]
+
+[[package]]
+name = "django-scheduler"
+version = "0.10.2"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "django" },
+    { name = "icalendar" },
+    { name = "python-dateutil" },
+    { name = "pytz" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/61/45/1e10208a308e41f59f3a1c5938abb0a4fd883871c24efd9822ce9c589cbd/django_scheduler-0.10.2.tar.gz", hash = "sha256:923b92129fc4a9825b6d82153cfa470f2fc00d51a3bcf42e52f9a3393d88d882", size = 89887, upload-time = "2026-02-10T21:52:54.873Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/da/0f/795314f26523ee9e23daebe484fdec18ebc1094ac85280eb12acacd3adfb/django_scheduler-0.10.2-py3-none-any.whl", hash = "sha256:30909d6a94ed01ccef350f831017d246227dd137412cdb55d20f9bf18d586f78", size = 101615, upload-time = "2026-02-10T21:52:56.298Z" },
 ]
 
 [[package]]
