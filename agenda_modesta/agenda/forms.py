@@ -14,7 +14,6 @@ class AgendaForm(forms.ModelForm):
             'data_inicio',
             'data_fim',
             'projeto',
-            'local',
             'confirmado',
             'notificar_email',
         ]
@@ -24,7 +23,6 @@ class AgendaForm(forms.ModelForm):
             'data_inicio': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
             'data_fim': forms.DateTimeInput(attrs={'class': 'form-input', 'type': 'datetime-local'}),
             'projeto': forms.Select(attrs={'class': 'form-input'}),
-            'local': forms.TextInput(attrs={'class': 'form-input'}),
             'confirmado': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'notificar_email': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
         }
@@ -68,9 +66,4 @@ class StepDetalhesForm(forms.Form):
         label="Data/hora fim",
         widget=forms.DateTimeInput(attrs={"class": "form-input", "type": "datetime-local"}),
     )
-    local = forms.CharField(
-        required=False,
-        max_length=150,
-        label="Local",
-        widget=forms.TextInput(attrs={"class": "form-input"}),
-    )
+

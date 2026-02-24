@@ -53,29 +53,31 @@
         </div>
 
         <div class="form-group">
-          <label for="id_valor_hora_pacote" class="form-label">Valor por Hora (R$) *</label>
+          <label for="id_valor_hora_pacote_0" class="form-label">Valor por Hora (R$) *</label>
           <input type="number"
-                 id="id_valor_hora_pacote"
-                 name="valor_hora_pacote"
-                 value="{{ form.valor_hora_pacote.value|default:'' }}"
+                 id="id_valor_hora_pacote_0"
+                 name="valor_hora_pacote_0"
+                 value="{{ form.valor_hora_pacote.value.0|default:form.instance.valor_hora_pacote.amount|default:'' }}"
                  step="0.01"
                  min="0"
                  class="form-input {% if form.valor_hora_pacote.errors %}border-red-500{% endif %}"
                  required>
+          <input type="hidden" name="valor_hora_pacote_1" value="BRL">
           {% if form.valor_hora_pacote.errors %}
           <p class="text-red-500 text-sm mt-1">{{ form.valor_hora_pacote.errors.0 }}</p>
           {% endif %}
         </div>
 
         <div class="form-group">
-          <label for="id_valor_hora_referencia" class="form-label">Valor/Hora Referência (R$)</label>
+          <label for="id_valor_hora_referencia_0" class="form-label">Valor/Hora Referência (R$)</label>
           <input type="number"
-                 id="id_valor_hora_referencia"
-                 name="valor_hora_referencia"
-                 value="{{ form.valor_hora_referencia.value|default:'' }}"
+                 id="id_valor_hora_referencia_0"
+                 name="valor_hora_referencia_0"
+                 value="{{ form.valor_hora_referencia.value.0|default:form.instance.valor_hora_referencia.amount|default:'' }}"
                  step="0.01"
                  min="0"
                  class="form-input">
+          <input type="hidden" name="valor_hora_referencia_1" value="BRL">
           <p class="text-xs text-gray-500 mt-1">Para exibir desconto ao cliente</p>
         </div>
 

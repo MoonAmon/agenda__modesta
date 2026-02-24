@@ -1,0 +1,6 @@
+# Ngrok – túnel HTTPS para receber webhooks do Google Calendar
+# ------------------------------------------------------------------------------
+# Obtenha seu token em: https://dashboard.ngrok.com/get-started/your-authtoken
+NGROK_AUTHTOKEN=2nfuUHhRbFoxU6ttWl3FI7ByHwL_23YYC9TS6Q3goo7poFx6R
+# Domínio estático gratuito: https://dashboard.ngrok.com/domains
+NGROK_DOMAIN=entomostracous-lelah-flexuosely.ngrok-free.dev

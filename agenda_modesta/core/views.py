@@ -75,3 +75,17 @@ def dashboard(request):
     }
 
     return render(request, 'pages/home.html', context)
+
+
+@login_required
+def proximos_agendamentos(request):
+    """Partial HTMX: retorna os próximos 5 agendamentos (para polling)."""
+    subscritor = get_user_subscritor(request.user)
+    proximos_agendamentos = Agenda.objects.filter(
+        subscritor=subscritor,
+        data_inicio__gte=timezone.now(),
+    ).select_related('projeto', 'projeto__cliente').order_by('data_inicio')[:5]
+
+    return render(request, 'pages/partials/proximos_agendamentos.html', {
+        'proximos_agendamentos': proximos_agendamentos,
+    })

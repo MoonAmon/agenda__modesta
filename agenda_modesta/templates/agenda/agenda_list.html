@@ -21,31 +21,6 @@
     </svg>
     Novo Agendamento
   </a>
-  <button
-    hx-get="{% url 'agenda:novo_agendamento' %}"
-    hx-target="#modal-content"
-    hx-trigger="click"
-    hx-swap="innerHTML"
-    onclick="
-      document.getElementById('modal-overlay').classList.remove('hidden')
-    "
-    class="btn btn-secondary ml-2"
-  >
-    <svg
-      class="w-5 h-5 mr-2"
-      fill="none"
-      stroke="currentColor"
-      viewBox="0 0 24 24"
-    >
-      <path
-        stroke-linecap="round"
-        stroke-linejoin="round"
-        stroke-width="2"
-        d="M13 10V3L4 14h7v7l9-11h-7z"
-      ></path>
-    </svg>
-    Agendamento Rápido
-  </button>
 </div>
 
 <!-- Filters -->
@@ -159,7 +134,7 @@
 <!-- Agenda List -->
 <div
   id="agenda-list"
-  hx-trigger="agendamentoCriado from:body"
+  hx-trigger="agendamentoCriado from:body, every 15s"
   hx-get="{% url 'agenda:list' %}"
   hx-target="#agenda-list"
   hx-swap="innerHTML"

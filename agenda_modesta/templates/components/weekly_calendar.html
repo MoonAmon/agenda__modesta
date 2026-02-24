@@ -1,14 +1,21 @@
-{% comment %}
-  Calendário semanal usando FullCalendar.js + django-scheduler API.
-  Recebe {{ calendar_slug }} do contexto.
-{% endcomment %}
+{% comment %} Calendário semanal usando FullCalendar.js + django-scheduler API.
+Recebe {{ calendar_slug }} do contexto. {% endcomment %}
 
 <div class="card mb-8">
   <div class="card-header">
     <h2 class="text-lg font-semibold text-gray-900 flex items-center gap-2">
-      <svg class="w-5 h-5 text-primary-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/>
+      <svg
+        class="w-5 h-5 text-primary-600"
+        fill="none"
+        stroke="currentColor"
+        viewBox="0 0 24 24"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
+        />
       </svg>
       Calendário Semanal
     </h2>
@@ -58,99 +65,107 @@
 </style>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-  var calendarEl = document.getElementById('fullcalendar');
-  if (!calendarEl) return;
+  document.addEventListener("DOMContentLoaded", function () {
+    var calendarEl = document.getElementById("fullcalendar");
+    if (!calendarEl) return;
 
-  var calendar = new FullCalendar.Calendar(calendarEl, {
-    // Configuração geral
-    initialView: 'timeGridWeek',
-    locale: 'pt-br',
-    timeZone: 'America/Sao_Paulo',
-    height: 'auto',
-    allDaySlot: false,
-    slotMinTime: '07:00:00',
-    slotMaxTime: '23:00:00',
-    slotDuration: '00:30:00',
-    slotLabelInterval: '01:00',
-    expandRows: true,
-    nowIndicator: true,
-    navLinks: true,
-    dayMaxEvents: true,
+    var calendar = new FullCalendar.Calendar(calendarEl, {
+      // Configuração geral
+      initialView: "timeGridWeek",
+      locale: "pt-br",
+      timeZone: "America/Sao_Paulo",
+      height: "auto",
+      allDaySlot: false,
+      slotMinTime: "07:00:00",
+      slotMaxTime: "23:00:00",
+      slotDuration: "00:30:00",
+      slotLabelInterval: "01:00",
+      expandRows: true,
+      nowIndicator: true,
+      navLinks: true,
+      dayMaxEvents: true,
 
-    // Toolbar
-    headerToolbar: {
-      left: 'prev,today,next',
-      center: 'title',
-      right: 'timeGridWeek,timeGridDay,dayGridMonth,listWeek'
-    },
-    buttonText: {
-      today: 'Hoje',
-      month: 'Mês',
-      week: 'Semana',
-      day: 'Dia',
-      list: 'Lista'
-    },
+      // Toolbar
+      headerToolbar: {
+        left: "prev,today,next",
+        center: "title",
+        right: "timeGridWeek,timeGridDay,dayGridMonth,listWeek",
+      },
+      buttonText: {
+        today: "Hoje",
+        month: "Mês",
+        week: "Semana",
+        day: "Dia",
+        list: "Lista",
+      },
 
-    // Buscar eventos da API do django-scheduler
-    events: function(info, successCallback, failureCallback) {
-      var start = info.startStr.split('T')[0];
-      var end = info.endStr.split('T')[0];
-      var url = '/schedule/api/occurrences?calendar_slug={{ calendar_slug }}'
-              + '&start=' + start
-              + '&end=' + end
-              + '&timezone=America/Sao_Paulo';
+      // Buscar eventos da API do django-scheduler
+      events: function (info, successCallback, failureCallback) {
+        var start = info.startStr.split("T")[0];
+        var end = info.endStr.split("T")[0];
+        var url =
+          "/schedule/api/occurrences?calendar_slug={{ calendar_slug }}" +
+          "&start=" +
+          start +
+          "&end=" +
+          end +
+          "&timezone=America/Sao_Paulo";
 
-      fetch(url, { credentials: 'same-origin' })
-        .then(function(resp) {
-          if (!resp.ok) throw new Error('HTTP ' + resp.status);
-          return resp.json();
-        })
-        .then(function(data) {
-          var events = data.map(function(occ) {
-            return {
-              id: occ.id,
-              title: occ.title,
-              start: occ.start,
-              end: occ.end,
-              color: occ.color || '#3b82f6',
-              url: occ.edit_url || null,
-              extendedProps: {
-                description: occ.description || '',
-                eventId: occ.event_id
-              }
-            };
+        fetch(url, { credentials: "same-origin" })
+          .then(function (resp) {
+            if (!resp.ok) throw new Error("HTTP " + resp.status);
+            return resp.json();
+          })
+          .then(function (data) {
+            var events = data.map(function (occ) {
+              return {
+                id: occ.id,
+                title: occ.title,
+                start: occ.start,
+                end: occ.end,
+                color: occ.color || "#3b82f6",
+                url: occ.edit_url || null,
+                extendedProps: {
+                  description: occ.description || "",
+                  eventId: occ.event_id,
+                },
+              };
+            });
+            successCallback(events);
+          })
+          .catch(function (err) {
+            console.error("[FullCalendar] Erro:", err);
+            failureCallback(err);
           });
-          successCallback(events);
-        })
-        .catch(function(err) {
-          console.error('[FullCalendar] Erro:', err);
-          failureCallback(err);
-        });
-    },
+      },
 
-    // Ao clicar num evento, ir para edição do agendamento
-    eventClick: function(info) {
-      info.jsEvent.preventDefault();
-      // Extrair agenda_id da description
-      var desc = info.event.extendedProps.description || '';
-      var match = desc.match(/agenda_id:([0-9a-f-]+)/);
-      if (match) {
-        window.location.href = '/agenda/' + match[1] + '/editar/';
-      }
-    },
+      // Ao clicar num evento, ir para edição do agendamento
+      eventClick: function (info) {
+        info.jsEvent.preventDefault();
+        // Extrair agenda_id da description
+        var desc = info.event.extendedProps.description || "";
+        var match = desc.match(/agenda_id:([0-9a-f-]+)/);
+        if (match) {
+          window.location.href = "/agenda/" + match[1] + "/editar/";
+        }
+      },
 
-    // Tooltip ao hover
-    eventDidMount: function(info) {
-      var desc = info.event.extendedProps.description || '';
-      // Limpar o agenda_id: da tooltip
-      var clean = desc.replace(/agenda_id:[0-9a-f-]+\n?/, '').trim();
-      if (clean) {
-        info.el.title = info.event.title + ' — ' + clean;
-      }
-    }
+      // Tooltip ao hover
+      eventDidMount: function (info) {
+        var desc = info.event.extendedProps.description || "";
+        // Limpar o agenda_id: da tooltip
+        var clean = desc.replace(/agenda_id:[0-9a-f-]+\n?/, "").trim();
+        if (clean) {
+          info.el.title = info.event.title + " — " + clean;
+        }
+      },
+    });
+
+    calendar.render();
+
+    // Auto-refresh: buscar novos eventos a cada 15 segundos
+    setInterval(function () {
+      calendar.refetchEvents();
+    }, 15000);
   });
-
-  calendar.render();
-});
 </script>

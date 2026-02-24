@@ -43,7 +43,6 @@ class Agenda(models.Model):
         choices=[("local", "Local"), ("google", "Google")],
         default="local",
     )
-    local = models.CharField(max_length=150, blank=True)
     google_calendar_id = models.CharField(max_length=255, blank=True)
     google_event_id = models.CharField(max_length=255, blank=True, db_index=True)
 

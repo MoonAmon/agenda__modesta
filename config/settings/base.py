@@ -235,7 +235,7 @@ SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = True
 # https://docs.djangoproject.com/en/dev/ref/settings/#x-frame-options
 X_FRAME_OPTIONS = "DENY"
-CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app"]  # noqa: S104
+CSRF_TRUSTED_ORIGINS = ["https://*.ngrok-free.app", "https://*.ngrok-free.dev"]  # noqa: S104
 
 # EMAIL
 # ------------------------------------------------------------------------------

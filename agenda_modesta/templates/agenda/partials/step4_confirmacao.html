@@ -25,9 +25,7 @@
       <span class="font-medium text-gray-600">Fim:</span> {{
       data_fim|date:"d/m/Y H:i" }}
     </p>
-    {% if local %}
-    <p><span class="font-medium text-gray-600">Local:</span> {{ local }}</p>
-    {% endif %}
+
   </div>
 
   <form
@@ -54,8 +52,6 @@
       name="data_fim"
       value="{{ data_fim|date:'Y-m-d\TH:i' }}"
     />
-    <input type="hidden" name="local" value="{{ local }}" />
-
     <div class="flex justify-end gap-2">
       <button
         type="button"

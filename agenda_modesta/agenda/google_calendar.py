@@ -113,7 +113,6 @@ def _agenda_to_event_body(agenda):
         "description": agenda.descricao,
         "start": {"dateTime": agenda.data_inicio.isoformat(), "timeZone": tz},
         "end": {"dateTime": agenda.data_fim.isoformat(), "timeZone": tz},
-        "location": agenda.local or "",
         "extendedProperties": {
             "private": {"agenda_modesta_id": str(agenda.pk)},
         },
@@ -166,7 +165,6 @@ def listar_eventos(max_results=10, days_ahead=30):
                 "summary": item.get("summary", "(Sem título)"),
                 "start": start.get("dateTime") or start.get("date", ""),
                 "end": end.get("dateTime") or end.get("date", ""),
-                "location": item.get("location", ""),
                 "description": item.get("description", ""),
                 "htmlLink": item.get("htmlLink", ""),
             }
@@ -365,7 +363,6 @@ def sincronizar_eventos_google(subscritor, usuario, sync_token: str = ""):
 
             agenda.titulo = item.get("summary", agenda.titulo)
             agenda.descricao = item.get("description", agenda.descricao)
-            agenda.local = item.get("location", agenda.local)
             agenda.data_inicio = _parse_google_datetime(item.get("start", {}))
             agenda.data_fim = _parse_google_datetime(item.get("end", {}))
             agenda.ultima_sincronizacao = timezone.now()
@@ -386,7 +383,6 @@ def sincronizar_eventos_google(subscritor, usuario, sync_token: str = ""):
         if existing:
             existing.titulo = item.get("summary", "(Sem título)")
             existing.descricao = item.get("description", "")
-            existing.local = item.get("location", "")
             existing.data_inicio = data_inicio
             existing.data_fim = data_fim
             existing.ultima_sincronizacao = timezone.now()
@@ -401,7 +397,6 @@ def sincronizar_eventos_google(subscritor, usuario, sync_token: str = ""):
                 descricao=item.get("description", ""),
                 data_inicio=data_inicio,
                 data_fim=data_fim,
-                local=item.get("location", ""),
                 origem="google",
                 google_event_id=google_event_id,
                 google_calendar_id=settings.GOOGLE_CALENDAR_ID,

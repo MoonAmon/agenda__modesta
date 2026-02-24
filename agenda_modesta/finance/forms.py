@@ -71,8 +71,6 @@ class PacoteServicoForm(forms.ModelForm):
             'nome': forms.TextInput(attrs={'class': 'form-input'}),
             'descricao': forms.Textarea(attrs={'class': 'form-input', 'rows': 3}),
             'horas_inclusas': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.5'}),
-            'valor_hora_pacote': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01'}),
-            'valor_hora_referencia': forms.NumberInput(attrs={'class': 'form-input', 'step': '0.01'}),
             'inclui_otimizacao': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),
             'beneficios': forms.Textarea(attrs={'class': 'form-input', 'rows': 3}),
             'ativo': forms.CheckboxInput(attrs={'class': 'form-checkbox'}),

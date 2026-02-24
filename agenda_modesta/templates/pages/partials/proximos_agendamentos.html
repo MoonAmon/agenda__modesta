@@ -1,0 +1,31 @@
+{% if proximos_agendamentos %}
+<ul class="space-y-3">
+  {% for agenda in proximos_agendamentos %}
+  <li class="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50">
+    <div
+      class="w-12 h-12 rounded-lg bg-primary-100 flex flex-col items-center justify-center text-primary-700"
+    >
+      <span class="text-xs font-medium">{{ agenda.data_inicio|date:"M" }}</span>
+      <span class="text-lg font-bold leading-none"
+        >{{ agenda.data_inicio|date:"d" }}</span
+      >
+    </div>
+    <div class="flex-1 min-w-0">
+      <p class="text-sm font-medium text-gray-900 truncate">
+        {{ agenda.titulo }}
+      </p>
+      <p class="text-xs text-gray-500">
+        {{ agenda.data_inicio|date:"H:i" }} - {{ agenda.projeto.cliente.nome|default:"Sem cliente" }}
+      </p>
+    </div>
+    {% if agenda.confirmado %}
+    <span class="badge badge-success">Confirmado</span>
+    {% else %}
+    <span class="badge badge-warning">Pendente</span>
+    {% endif %}
+  </li>
+  {% endfor %}
+</ul>
+{% else %}
+<p class="text-gray-500 text-center py-8">Nenhum agendamento próximo</p>
+{% endif %}

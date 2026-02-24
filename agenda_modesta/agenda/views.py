@@ -176,7 +176,6 @@ def step2_detalhes(request):
         "descricao": form.cleaned_data["descricao"],
         "data_inicio": form.cleaned_data["data_inicio"],
         "data_fim": form.cleaned_data["data_fim"],
-        "local": form.cleaned_data["local"],
     })
 
 
@@ -205,7 +204,6 @@ def step3_confirmar(request):
         descricao=form.cleaned_data["descricao"],
         data_inicio=form.cleaned_data["data_inicio"],
         data_fim=form.cleaned_data["data_fim"],
-        local=form.cleaned_data["local"],
         confirmado=True,
         notificar_email=True,
     )
@@ -272,7 +270,6 @@ def agenda_week_json(request):
             "end": a.data_fim.isoformat(),
             "confirmed": a.confirmado,
             "client": a.projeto.cliente.nome if a.projeto and a.projeto.cliente else "",
-            "location": a.local or "",
             "day": a.data_inicio.weekday(),  # 0=Mon, 6=Sun
             "origem": a.origem,
         })

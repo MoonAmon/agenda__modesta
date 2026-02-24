@@ -9,10 +9,11 @@ from drf_spectacular.views import SpectacularAPIView
 from drf_spectacular.views import SpectacularSwaggerView
 from rest_framework.authtoken.views import obtain_auth_token
 
-from agenda_modesta.core.views import dashboard
+from agenda_modesta.core.views import dashboard, proximos_agendamentos
 
 urlpatterns = [
     path("", dashboard, name="home"),
+    path("proximos-agendamentos/", proximos_agendamentos, name="proximos_agendamentos"),
     path(
         "about/",
         TemplateView.as_view(template_name="pages/about.html"),
