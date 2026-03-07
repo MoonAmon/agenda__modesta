@@ -12,6 +12,16 @@
 
 <div class="card max-w-3xl">
   <div class="card-body">
+    {% if form.errors %}
+    <div class="bg-red-50 border border-red-200 rounded-lg p-4 mb-4">
+      <p class="font-medium text-red-800">Erros no formulário:</p>
+      <ul class="text-sm text-red-700 mt-1">
+        {% for field, errors in form.errors.items %}
+        <li><strong>{{ field }}:</strong> {{ errors|join:", " }}</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
     <form method="post" class="space-y-6">
       {% csrf_token %}
 
@@ -24,7 +34,7 @@
                   required>
             <option value="">Selecione um cliente...</option>
             {% for cliente in clientes %}
-            <option value="{{ cliente.id }}" {% if form.cliente.value == cliente.id|stringformat:"s" or cliente_selecionado == cliente.id %}selected{% endif %}>{{ cliente.nome }}</option>
+            <option value="{{ cliente.id }}" {% if form.cliente.value|stringformat:"s" == cliente.id|stringformat:"s" or cliente_selecionado|stringformat:"s" == cliente.id|stringformat:"s" %}selected{% endif %}>{{ cliente.nome }}</option>
             {% endfor %}
           </select>
           {% if form.cliente.errors %}
@@ -39,7 +49,7 @@
                   class="form-input">
             <option value="">Selecione um projeto...</option>
             {% for projeto in projetos %}
-            <option value="{{ projeto.id }}" {% if form.projeto.value == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }}</option>
+            <option value="{{ projeto.id }}" {% if form.projeto.value|stringformat:"s" == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }}</option>
             {% endfor %}
           </select>
         </div>
@@ -51,13 +61,14 @@
                   class="form-input"
                   hx-get="{% url 'finance:get_pacote_info' %}"
                   hx-trigger="change"
-                  hx-target="#pacote-info">
-            <option value="">Sem pacote (hora avulsa)</option>
+                  hx-target="#pacote-info"
+                  x-on:change="onPacoteChange($event)">
+            <option value="" data-horas="" data-valor="">Sem pacote (hora avulsa)</option>
             {% for pacote in pacotes %}
             <option value="{{ pacote.id }}"
-                    {% if form.pacote.value == pacote.id|stringformat:"s" %}selected{% endif %}
-                    data-horas="{{ pacote.horas_inclusas }}"
-                    data-valor="{{ pacote.valor_hora_pacote }}">
+                    {% if form.pacote.value|stringformat:"s" == pacote.id|stringformat:"s" %}selected{% endif %}
+                    data-horas="{{ pacote.horas_inclusas|default_if_none:'' }}"
+                    data-valor="{{ pacote.valor_hora_pacote.amount|default_if_none:'' }}">
               {{ pacote.nome }}
             </option>
             {% endfor %}
@@ -71,39 +82,39 @@
                     name="descricao"
                     rows="3"
                     class="form-input"
-                    placeholder="Descreva os serviços inclusos neste orçamento...">{{ form.descricao.value|default:'' }}</textarea>
+                    placeholder="Descreva os serviços inclusos neste orçamento...">{{ form.descricao.value|default_if_none:'' }}</textarea>
         </div>
 
-        <div class="form-group">
-          <label for="id_horas_trabalhadas" class="form-label">Horas *</label>
-          <input type="number"
-                 id="id_horas_trabalhadas"
-                 name="horas_trabalhadas"
-                 value="{{ form.horas_trabalhadas.value|default:'' }}"
-                 step="0.5"
-                 min="0.5"
-                 class="form-input {% if form.horas_trabalhadas.errors %}border-red-500{% endif %}"
-                 required
-                 x-on:input="calcularTotal()">
-          {% if form.horas_trabalhadas.errors %}
-          <p class="text-red-500 text-sm mt-1">{{ form.horas_trabalhadas.errors.0 }}</p>
-          {% endif %}
-        </div>
+        <div id="campos-horas-valor" class="contents">
+          <div class="form-group" id="grupo-horas">
+            <label for="id_horas_trabalhadas" class="form-label">Horas *</label>
+            <input type="number"
+                   id="id_horas_trabalhadas"
+                   name="horas_trabalhadas"
+                   value="{% if form.horas_trabalhadas.value != None %}{{ form.horas_trabalhadas.value|stringformat:'s' }}{% endif %}"
+                   step="0.5"
+                   min="0.5"
+                   class="form-input {% if form.horas_trabalhadas.errors %}border-red-500{% endif %}"
+                   x-on:input="calcularTotal()">
+            {% if form.horas_trabalhadas.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ form.horas_trabalhadas.errors.0 }}</p>
+            {% endif %}
+          </div>
 
-        <div class="form-group">
-          <label for="id_valor_hora" class="form-label">Valor/Hora (R$) *</label>
-          <input type="number"
-                 id="id_valor_hora"
-                 name="valor_hora"
-                 value="{{ form.valor_hora.value|default:'' }}"
-                 step="0.01"
-                 min="0"
-                 class="form-input {% if form.valor_hora.errors %}border-red-500{% endif %}"
-                 required
-                 x-on:input="calcularTotal()">
-          {% if form.valor_hora.errors %}
-          <p class="text-red-500 text-sm mt-1">{{ form.valor_hora.errors.0 }}</p>
-          {% endif %}
+          <div class="form-group" id="grupo-valor-hora">
+            <label for="id_valor_hora" class="form-label">Valor/Hora (R$) *</label>
+            <input type="number"
+                   id="id_valor_hora"
+                   name="valor_hora"
+                   value="{% if form.valor_hora.value != None %}{{ form.valor_hora.value|stringformat:'s' }}{% endif %}"
+                   step="0.01"
+                   min="0"
+                   class="form-input {% if form.valor_hora.errors %}border-red-500{% endif %}"
+                   x-on:input="calcularTotal()">
+            {% if form.valor_hora.errors %}
+            <p class="text-red-500 text-sm mt-1">{{ form.valor_hora.errors.0 }}</p>
+            {% endif %}
+          </div>
         </div>
 
         <div class="form-group">
@@ -111,7 +122,7 @@
           <input type="number"
                  id="id_valor_total"
                  name="valor_total"
-                 value="{{ form.valor_total.value|default:'' }}"
+                 value="{% if form.valor_total.value != None %}{{ form.valor_total.value|stringformat:'s' }}{% endif %}"
                  step="0.01"
                  class="form-input bg-gray-50 font-bold text-lg"
                  readonly>
@@ -145,7 +156,7 @@
           <input type="date"
                  id="id_data_validade"
                  name="data_validade"
-                 value="{{ form.data_validade.value|date:'Y-m-d'|default:'' }}"
+                 value="{% if form.data_validade.value != None %}{{ form.data_validade.value|stringformat:'s'|slice:':10' }}{% endif %}"
                  class="form-input">
         </div>
 
@@ -181,15 +192,93 @@
 
 {% block inline_javascript %}
 <script>
-function calcularTotal() {
-  const horas = parseFloat(document.getElementById('id_horas_trabalhadas').value) || 0;
-  const valorHora = parseFloat(document.getElementById('id_valor_hora').value) || 0;
-  const total = horas * valorHora;
-  document.getElementById('id_valor_total').value = total.toFixed(2);
+// Pacote data from server (numeric values, no locale/currency issues)
+var PACOTES_DATA = {{ pacotes_json|safe }};
+
+function getSelectedPacoteData() {
+  const select = document.getElementById('id_pacote');
+  const selectedValue = select.value;
+  
+  if (!selectedValue) {
+    return { horas: null, valor: null, hasPacote: false };
+  }
+  
+  const pacote = PACOTES_DATA[selectedValue];
+  if (!pacote) {
+    return { horas: null, valor: null, hasPacote: false };
+  }
+  
+  return {
+    horas: pacote.horas,
+    valor: pacote.valor,
+    hasPacote: true,
+  };
 }
 
-// Calculate on page load
-document.addEventListener('DOMContentLoaded', calcularTotal);
+function isPacoteComHoras() {
+  const data = getSelectedPacoteData();
+  return data.hasPacote && data.horas !== null && data.horas > 0;
+}
+
+function toggleCamposHorasValor() {
+  const esconder = isPacoteComHoras();
+  const grupoHoras = document.getElementById('grupo-horas');
+  const grupoValorHora = document.getElementById('grupo-valor-hora');
+  const inputHoras = document.getElementById('id_horas_trabalhadas');
+  const inputValorHora = document.getElementById('id_valor_hora');
+
+  if (esconder) {
+    grupoHoras.style.display = 'none';
+    grupoValorHora.style.display = 'none';
+    inputHoras.removeAttribute('required');
+    inputValorHora.removeAttribute('required');
+  } else {
+    grupoHoras.style.display = '';
+    grupoValorHora.style.display = '';
+    inputHoras.setAttribute('required', '');
+    inputValorHora.setAttribute('required', '');
+  }
+}
+
+function calcularTotal() {
+  const data = getSelectedPacoteData();
+
+  if (data.hasPacote && data.horas !== null && data.valor !== null && data.horas > 0) {
+    // Pacote com horas inclusas: total = horas_inclusas * valor_hora_pacote
+    const total = data.horas * data.valor;
+    document.getElementById('id_valor_total').value = total.toFixed(2);
+    document.getElementById('id_horas_trabalhadas').value = data.horas;
+    document.getElementById('id_valor_hora').value = data.valor;
+  } else if (data.hasPacote && data.valor !== null) {
+    // Pacote sem horas inclusas (hora avulsa com pacote): usa valor do pacote
+    const horas = parseFloat(document.getElementById('id_horas_trabalhadas').value) || 0;
+    document.getElementById('id_valor_hora').value = data.valor;
+    const total = horas * data.valor;
+    document.getElementById('id_valor_total').value = total.toFixed(2);
+  } else {
+    // Sem pacote: cálculo manual
+    const horas = parseFloat(document.getElementById('id_horas_trabalhadas').value) || 0;
+    const valorHora = parseFloat(document.getElementById('id_valor_hora').value) || 0;
+    const total = horas * valorHora;
+    document.getElementById('id_valor_total').value = total.toFixed(2);
+  }
+}
+
+function onPacoteChange(event) {
+  toggleCamposHorasValor();
+  calcularTotal();
+}
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', function() {
+  // Also bind change event directly (fallback for Alpine.js)
+  var pacoteSelect = document.getElementById('id_pacote');
+  if (pacoteSelect) {
+    pacoteSelect.addEventListener('change', onPacoteChange);
+  }
+  toggleCamposHorasValor();
+  calcularTotal();
+});
 </script>
 {% endblock %}
 {% endblock %}

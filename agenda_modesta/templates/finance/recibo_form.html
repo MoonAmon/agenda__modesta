@@ -24,7 +24,7 @@
                   required>
             <option value="">Selecione um cliente...</option>
             {% for cliente in clientes %}
-            <option value="{{ cliente.id }}" {% if form.cliente.value == cliente.id|stringformat:"s" %}selected{% endif %}>{{ cliente.nome }}</option>
+            <option value="{{ cliente.id }}" {% if form.cliente.value|stringformat:"s" == cliente.id|stringformat:"s" %}selected{% endif %}>{{ cliente.nome }}</option>
             {% endfor %}
           </select>
           {% if form.cliente.errors %}
@@ -39,7 +39,7 @@
                   class="form-input">
             <option value="">Selecione um projeto...</option>
             {% for projeto in projetos %}
-            <option value="{{ projeto.id }}" {% if form.projeto.value == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }}</option>
+            <option value="{{ projeto.id }}" {% if form.projeto.value|stringformat:"s" == projeto.id|stringformat:"s" %}selected{% endif %}>{{ projeto.nome }}</option>
             {% endfor %}
           </select>
         </div>
@@ -50,7 +50,7 @@
                     name="descricao"
                     rows="3"
                     class="form-input"
-                    placeholder="Descreva os serviços realizados...">{{ form.descricao.value|default:'' }}</textarea>
+                    placeholder="Descreva os serviços realizados...">{{ form.descricao.value|default_if_none:'' }}</textarea>
         </div>
 
         <div class="form-group">
@@ -58,7 +58,7 @@
           <input type="number"
                  id="id_horas_trabalhadas"
                  name="horas_trabalhadas"
-                 value="{{ form.horas_trabalhadas.value|default:'' }}"
+                 value="{% if form.horas_trabalhadas.value != None %}{{ form.horas_trabalhadas.value|stringformat:'s' }}{% endif %}"
                  step="0.5"
                  min="0.5"
                  class="form-input {% if form.horas_trabalhadas.errors %}border-red-500{% endif %}"
@@ -74,7 +74,7 @@
           <input type="number"
                  id="id_valor_hora"
                  name="valor_hora"
-                 value="{{ form.valor_hora.value|default:'' }}"
+                 value="{% if form.valor_hora.value != None %}{{ form.valor_hora.value|stringformat:'s' }}{% endif %}"
                  step="0.01"
                  min="0"
                  class="form-input {% if form.valor_hora.errors %}border-red-500{% endif %}"
@@ -90,7 +90,7 @@
           <input type="number"
                  id="id_valor_total"
                  name="valor_total"
-                 value="{{ form.valor_total.value|default:'' }}"
+                 value="{% if form.valor_total.value != None %}{{ form.valor_total.value|stringformat:'s' }}{% endif %}"
                  step="0.01"
                  class="form-input bg-gray-50 font-bold text-lg"
                  readonly>
@@ -123,8 +123,12 @@
 {% block inline_javascript %}
 <script>
 function calcularTotal() {
-  const horas = parseFloat(document.getElementById('id_horas_trabalhadas').value) || 0;
-  const valorHora = parseFloat(document.getElementById('id_valor_hora').value) || 0;
+  const horasInput = document.getElementById('id_horas_trabalhadas').value;
+  const valorHoraInput = document.getElementById('id_valor_hora').value;
+  
+  const horas = horasInput && horasInput.trim() !== '' ? parseFloat(horasInput) || 0 : 0;
+  const valorHora = valorHoraInput && valorHoraInput.trim() !== '' ? parseFloat(valorHoraInput) || 0 : 0;
+  
   const total = horas * valorHora;
   document.getElementById('id_valor_total').value = total.toFixed(2);
 }

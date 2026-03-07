@@ -1,3 +1,5 @@
+import json
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
@@ -69,6 +71,15 @@ def orcamento_create(request):
     pacotes = PacoteServico.objects.filter(subscritor=subscritor, ativo=True)
     cliente_selecionado = request.GET.get('cliente')
 
+    # Serialize pacote data as JSON for JavaScript
+    pacotes_json = json.dumps({
+        str(p.id): {
+            'horas': float(p.horas_inclusas) if p.horas_inclusas else None,
+            'valor': float(p.valor_hora_pacote.amount) if p.valor_hora_pacote else None,
+        }
+        for p in pacotes
+    })
+
     if request.method == 'POST':
         form = OrcamentoForm(request.POST)
         if form.is_valid():
@@ -95,6 +106,7 @@ def orcamento_create(request):
         'clientes': clientes,
         'projetos': projetos,
         'pacotes': pacotes,
+        'pacotes_json': pacotes_json,
         'cliente_selecionado': cliente_selecionado,
     })
 
@@ -106,6 +118,14 @@ def orcamento_edit(request, pk):
     clientes = Cliente.objects.filter(subscritor=subscritor, ativo=True)
     projetos = Projeto.objects.filter(subscritor=subscritor, ativo=True)
     pacotes = PacoteServico.objects.filter(subscritor=subscritor, ativo=True)
+
+    pacotes_json = json.dumps({
+        str(p.id): {
+            'horas': float(p.horas_inclusas) if p.horas_inclusas else None,
+            'valor': float(p.valor_hora_pacote.amount) if p.valor_hora_pacote else None,
+        }
+        for p in pacotes
+    })
 
     if request.method == 'POST':
         form = OrcamentoForm(request.POST, instance=orcamento)
@@ -122,6 +142,7 @@ def orcamento_edit(request, pk):
         'clientes': clientes,
         'projetos': projetos,
         'pacotes': pacotes,
+        'pacotes_json': pacotes_json,
     })
 
 
@@ -169,7 +190,11 @@ def get_pacote_info(request):
     pacote_id = request.GET.get('pacote')
     if pacote_id:
         pacote = get_object_or_404(PacoteServico, pk=pacote_id, subscritor=subscritor)
-        return render(request, 'finance/partials/pacote_info.html', {'pacote': pacote})
+        return render(request, 'finance/partials/pacote_info.html', {
+            'pacote': pacote,
+            'valor_hora_num': _get_money_amount(pacote.valor_hora_pacote),
+            'valor_ref_num': _get_money_amount(pacote.valor_hora_referencia),
+        })
     return HttpResponse("")
 
 
@@ -329,10 +354,20 @@ def pacote_create(request):
             pacote.save()
             messages.success(request, 'Pacote criado com sucesso!')
             return redirect('finance:pacotes')
+        else:
+            # Adicionar mensagem de erro para debug
+            messages.error(request, 'Erro ao criar pacote. Verifique os campos abaixo.')
     else:
         form = PacoteServicoForm()
 
     return render(request, 'finance/pacote_form.html', {'form': form})
+
+
+def _get_money_amount(money_value):
+    """Safely extract amount from a Money field value."""
+    if money_value is not None and hasattr(money_value, 'amount'):
+        return money_value.amount
+    return ''
 
 
 @login_required
@@ -352,6 +387,8 @@ def pacote_edit(request, pk):
     return render(request, 'finance/pacote_form.html', {
         'form': form,
         'pacote': pacote,
+        'valor_hora_pacote_initial': _get_money_amount(pacote.valor_hora_pacote),
+        'valor_hora_referencia_initial': _get_money_amount(pacote.valor_hora_referencia),
     })
 
 

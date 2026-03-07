@@ -4,15 +4,21 @@
     <div>
       <p class="font-medium text-primary-900">{{ pacote.nome }}</p>
       {% if pacote.horas_inclusas %}
-      <p class="text-sm text-primary-700">{{ pacote.horas_inclusas }}h incluídas a R$ {{ pacote.valor_hora_pacote }}/h</p>
+      <p class="text-sm text-primary-700">
+        {{ pacote.horas_inclusas }}h incluídas a R$ {{ valor_hora_num }}/h
+      </p>
       {% else %}
-      <p class="text-sm text-primary-700">Hora avulsa a R$ {{ pacote.valor_hora_pacote }}/h</p>
+      <p class="text-sm text-primary-700">
+        Hora avulsa a R$ {{ valor_hora_num }}/h
+      </p>
       {% endif %}
     </div>
     {% if pacote.valor_hora_referencia %}
     <div class="text-right">
       <p class="text-xs text-primary-600">Valor referência</p>
-      <p class="text-sm line-through text-primary-500">R$ {{ pacote.valor_hora_referencia }}/h</p>
+      <p class="text-sm line-through text-primary-500">
+        R$ {{ valor_ref_num }}/h
+      </p>
     </div>
     {% endif %}
   </div>
@@ -21,16 +27,35 @@
     <ul class="text-xs text-primary-700 space-y-1">
       {% if pacote.inclui_otimizacao %}
       <li class="flex items-center gap-1">
-        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        <svg
+          class="w-3 h-3"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
         </svg>
         Inclui otimização
       </li>
-      {% endif %}
-      {% if pacote.beneficios %}
+      {% endif %} {% if pacote.beneficios %}
       <li class="flex items-start gap-1">
-        <svg class="w-3 h-3 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+        <svg
+          class="w-3 h-3 mt-0.5"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M5 13l4 4L19 7"
+          ></path>
         </svg>
         {{ pacote.beneficios|truncatewords:15 }}
       </li>

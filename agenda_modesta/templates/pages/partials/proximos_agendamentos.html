@@ -15,7 +15,8 @@
         {{ agenda.titulo }}
       </p>
       <p class="text-xs text-gray-500">
-        {{ agenda.data_inicio|date:"H:i" }} - {{ agenda.projeto.cliente.nome|default:"Sem cliente" }}
+        {{ agenda.data_inicio|date:"H:i" }} - {{
+        agenda.projeto.cliente.nome|default:"Sem cliente" }}
       </p>
     </div>
     {% if agenda.confirmado %}
