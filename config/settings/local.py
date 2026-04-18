@@ -31,6 +31,12 @@ CACHES = {
 EMAIL_HOST = env("EMAIL_HOST", default="mailpit")
 # https://docs.djangoproject.com/en/dev/ref/settings/#email-port
 EMAIL_PORT = 1025
+# Mailpit local SMTP does not support TLS/SSL.
+EMAIL_USE_TLS = False
+EMAIL_USE_SSL = False
+
+# allauth: disable email verification in local development.
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # WhiteNoise
 # ------------------------------------------------------------------------------
